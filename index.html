@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" class="has-background-grey">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MathDad's Lewd Gallery</title>
+    <link rel="icon" type="image/png" href="favicon/icon.png" />
+    <link rel="stylesheet" type="text/css" href="css/bulma.css" />
+    <link rel="stylesheet" type="text/css" href="css/images.css" />
+    <link rel="stylesheet" type="text/css" href="css/lightbox.css" />
+    <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="js/lightbox-plus-jquery.js"></script>
+    <script type="text/javascript" src="js/gallery.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Get all "navbar-burger" elements
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+            // Check if there are any navbar burgers
+            if ($navbarBurgers.length > 0) {
+
+                // Add a click event on each of them
+                $navbarBurgers.forEach( el => {
+                    el.addEventListener('click', () => {
+
+                        // Get the target from the "data-target" attribute
+                        const target = el.dataset.target;
+                        const $target = document.getElementById(target);
+
+                        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                        el.classList.toggle('is-active');
+                        $target.classList.toggle('is-active');
+
+                    });
+                });
+            }
+
+        });
+    </script>
+</head>
+<body class="has-background-grey-dark">
+<!-- Content -->
+<section class="section">
+    <div class="container is-max-widescreen">
+
+        <!-- Navigation -->
+        <nav class="navbar has-background-grey-dark has-text-white" role="navigation" aria-label="main-menu">
+
+            <div class="navbar-brand has-background-grey-dark has-text-white">
+
+                <strong class="navbar-item has-text-white">MATHDAD'S LEWD GALLERY</strong>
+
+                <a role="button" class="navbar-burger has-text-white" aria-label="menu" aria-expanded="false" data-target="navMenu">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navMenu" class="navbar-menu has-background-grey-dark has-text-white">
+                <div class="navbar-start">
+
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link has-background-grey-dark has-text-white">
+                            Images
+                        </a>
+
+                        <div class="navbar-dropdown has-background-grey-dark has-text-white">
+                            <a href="#" id="view-images-link" class="navbar-item has-background-grey-dark has-text-white">
+                                View Pages
+                            </a>
+                            <a href="#" id="view-all-images-link" class="navbar-item has-background-grey-dark has-text-white">
+                                View All
+                            </a>
+                            <a href="#" id="tags-link" class="navbar-item has-background-grey-dark has-text-white">
+                                Tags
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link has-background-grey-dark has-text-white">
+                            Videos
+                        </a>
+
+                        <div class="navbar-dropdown has-background-grey-dark has-text-white">
+                            <a href="#" id="view-videos-link" class="navbar-item has-background-grey-dark has-text-white">
+                                View Pages
+                            </a>
+                            <a href="#" id="view-all-videos-link" class="navbar-item has-background-grey-dark has-text-white">
+                                View All
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <form name="form_search" id="form_search">
+                            <div class="field has-addons">
+                                <div class="control">
+                                    <input class="input" title="Tag List" type="text" name="search_term" placeholder="Search for a tag" list="tags">
+                                    <datalist id="tags">
+                                        <?php foreach (Tags::getAllTags() as $tag) { ?>
+                                        <option value="<?=$tag->tag;?>">
+                                            <?php } ?>
+                                    </datalist>
+                                </div>
+                                <div class="control">
+                                    <button name="submit" value="Search" class="button is-info">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button is-primary has-background-link-dark has-text-white">
+                                <strong>Total: <span id="total"></span></strong>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Pagination -->
+        <div id="pagination-top"></div>
+
+        <div class="columns is-flex-direction-column" style="min-height:75vh;">
+            <div class="column">
+                <div class="columns" id="content-display">
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination-bottom"></div>
+
+    </div>
+</section>
+<footer class="footer has-background-grey has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span style="font-weight:bold;">Execution Time</span>: <?=$execution_time;?> sec
+        </p>
+    </div>
+</footer>
+</body>
+</html>

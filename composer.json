@@ -1,0 +1,17 @@
+{
+    "require": {
+        "jenssegers/imagehash": "*",
+        "slim/slim": "*",
+        "slim/psr7": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gallery\\": ["includes/", "includes/Gallery"],
+            "Routes\\": ["api/", "includes/Routes"]
+        }
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest",
+        "squizlabs/php_codesniffer": "3.*"
+    }
+}
