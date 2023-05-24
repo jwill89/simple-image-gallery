@@ -14,12 +14,5 @@
 }
 
 .child {
-    align-self: center;
     margin: 0 1rem 2rem 1rem;
-    box-shadow: 3px 3px 5px black;
-    transition: box-shadow .3s ease-in-out 0s;
-}
-
-.child:hover {
-    box-shadow: 3px 3px 5px #82b2ff;
 }
