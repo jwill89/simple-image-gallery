@@ -94,12 +94,16 @@ function GalleryContent()
                 results.forEach((image) => {
                     content += "" +
                         "   <div class='card child' style='background-color:#c4c4c4;'>" +
-                        "       <div class='card-image'>" +
-                        "           <a href=\"images/full/" + image.filename + "\" data-lightbox=\"page-images\" data-title=\"<a href='images/full/" + image.filename + "' target='_blank'>View Image in New Tab</a>\">" +
-                        "           <img alt='' src=\"images/thumbs/" + image.filename + "\" /></a>" +
+                        "       <div class='card-content has-text-centered'>" +
+                        "           <figure class='image'>" +
+                        "               <img alt='' src=\"images/thumbs/" + image.filename + "\" />" +
+                        "           </figure>" +
                         "       </div>" +
                         "       <footer class='card-footer'>" +
-                        "           <a href='#' data-id='" + image.id + "' class='card-footer-item' style='padding:.1rem;'>Add Tags</a>" +
+                        "           <a href=\"images/full/" + image.filename + "\" class='card-footer-item' data-lightbox=\"page-images\" data-title=\"Tags List Coming Soon\">" +
+                        "                <i class='fa-sharp fa-solid fa-magnifying-glass-plus' title='Zoom In'></i></a>" +
+                        "           <a href=\"images/full/" + image.filename + "\" target='_blank' class='card-footer-item'><i class='fa-sharp fa-solid fa-up-right-from-square' title='View Full Size'></i></a>" +
+                        "           <a href='#' data-id='" + image.id + "' class='card-footer-item'><i class='fa-sharp fa-solid fa-tags' title='Add/View Tags'></i></a>" +
                         "       </footer>" +
                         "   </div>";
                 });
