@@ -88,12 +88,13 @@ function GalleryContent()
             dataType: 'json',
             success: function (results) {
                 content += "" +
-                    "<div class='column'>" +
+                    "<div class='column is-full is-align-content-end'>" +
                     "   <div class='parent'>";
 
                 results.forEach((image) => {
                     content += "" +
-                        "   <div class='card child' style='background-color:#c4c4c4;'>" +
+                        "<div class='is-flex is-align-self-flex-end'>" +
+                        "   <div class='card child has-background-taupe-grey has-border-white'>" +
                         "       <div class='card-content has-text-centered'>" +
                         "           <figure class='image'>" +
                         "               <img alt='' src=\"images/thumbs/" + image.filename + "\" />" +
@@ -101,11 +102,23 @@ function GalleryContent()
                         "       </div>" +
                         "       <footer class='card-footer'>" +
                         "           <a href=\"images/full/" + image.filename + "\" class='card-footer-item' data-lightbox=\"page-images\" data-title=\"Tags List Coming Soon\">" +
-                        "                <i class='fa-sharp fa-solid fa-magnifying-glass-plus' title='Zoom In'></i></a>" +
-                        "           <a href=\"images/full/" + image.filename + "\" target='_blank' class='card-footer-item'><i class='fa-sharp fa-solid fa-up-right-from-square' title='View Full Size'></i></a>" +
-                        "           <a href='#' data-id='" + image.id + "' class='card-footer-item'><i class='fa-sharp fa-solid fa-tags' title='Add/View Tags'></i></a>" +
+                        "               <span class='icon has-text-jordy-blue'>" +
+                        "                   <i class='fa-sharp fa-solid fa-magnifying-glass-plus' title='Zoom In'></i>" +
+                        "               </span>" +
+                        "           </a>" +
+                        "           <a href=\"images/full/" + image.filename + "\" target='_blank' class='card-footer-item'>" +
+                        "               <span class='icon has-text-jordy-blue'>" +
+                        "                   <i class='fa-sharp fa-solid fa-up-right-from-square' title='View Full Size'></i>" +
+                        "               </span>" +
+                        "           </a>" +
+                        "           <a href='#' data-id='" + image.id + "' class='card-footer-item'>" +
+                        "               <span class='icon has-text-jordy-blue'>" +
+                        "                   <i class='fa-sharp fa-solid fa-tags' title='Add/View Tags'></i>" +
+                        "               </span>" +
+                        "           </a>" +
                         "       </footer>" +
-                        "   </div>";
+                        "   </div>" +
+                        " </div>";
                 });
 
                 content += "" +
@@ -206,7 +219,7 @@ function GalleryPagination()
             TotalPages = result;
 
             // Start Pagination
-            pagination = "<nav class='pagination is-centered has-background-grey-dark' role='navigation' aria-label='pagination'>"
+            pagination = "<nav class='pagination is-centered has-background-eggplant' role='navigation' aria-label='pagination'>"
 
             // Do we have an enabled previous page? (Page > 1)
             if (CurrentPage > 1) {
@@ -237,7 +250,7 @@ function GalleryPagination()
             }
 
             // Current Page
-            pagination += "<li><a class='pagination-link is-current' aria-label='Page " + CurrentPage + "' aria-current='page'>" + CurrentPage + "</a></li>"
+            pagination += "<li><a class='pagination-link has-background-cadet-grey has-text-white' aria-label='Page " + CurrentPage + "' aria-current='page'>" + CurrentPage + "</a></li>"
 
             // Next Page if Page < Total Pages
             if (CurrentPage < TotalPages) {
