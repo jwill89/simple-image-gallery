@@ -9,8 +9,7 @@ require('vendor/autoload.php');
 
 use Jenssegers\ImageHash\ImageHash;
 use Jenssegers\ImageHash\Implementations\DifferenceHash;
-use Gallery\Config;
-use Gallery\Collections\ImageCollection;
+use Gallery\Collection\ImageCollection;
 
 // Set Time Limit for Script, 10 minutes
 set_time_limit(0);
@@ -21,9 +20,6 @@ ignore_user_abort(true);
 // Set Start Time
 $start_time = microtime(true);
 
-// Image Directory
-$image_dir_full = Config::IMAGE_DIR . "full/";
-
 // Image Comparison Hasher
 $hasher = new ImageHash(new DifferenceHash());
 
@@ -32,11 +28,11 @@ $matches = [];
 
 // Get the images already in the database
 $collection = new ImageCollection();
-$images_in_database = $collection->getAllImages();
+$images_in_database = $collection->getAll();
 
 // Get the images in the folder
-$images_in_folder = array_filter(scandir($image_directory), function($item) {
-	return !is_dir($image_dir_full . $item);
+$images_in_folder = array_filter(scandir(ImageCollection::IMAGE_DIRECTORY_FULL), function($item) {
+	return !is_dir(ImageCollection::IMAGE_DIRECTORY_FULL . $item);
 });
 
 // Create folder hashes
@@ -46,7 +42,7 @@ foreach ($images_in_folder as $key => $folder_filename) {
 	
 	try {
 	
-		$folder_hash = $hasher->hash($image_directory . $folder_filename);
+		$folder_hash = $hasher->hash(ImageCollection::IMAGE_DIRECTORY_FULL . $folder_filename);
 		
 		$folder_hashes[$key] = $folder_hash;
 	
@@ -62,13 +58,13 @@ foreach ($images_in_database as $img) {
 	
 	try {
 	
-		$database_hash = $hasher->hash($image_directory . $img['filename']);
+		$database_hash = $hasher->hash(ImageCollection::IMAGE_DIRECTORY_FULL . $img->getFilename());
 		
 		foreach ($folder_hashes as $key => $folder_hash) {
 					
 			if ($hasher->distance($database_hash, $folder_hash) <= 2) {
 				
-				$matches[] = [$img['filename'], $images_in_folder[$key]];
+				$matches[] = [$img->getFilename(), $images_in_folder[$key]];
 				
 			}
 			
@@ -103,7 +99,7 @@ foreach ($matches as $item) {
 // Save to File if we have matches
 if (!empty($differences)) {
 	
-	$json_file = fopen('dupes-' . date('Y-m-d') . '.json', 'w');
+	$json_file = fopen('dupes/dupes-' . date('Y-m-d') . '.json', 'w');
 	
 	fwrite($json_file, json_encode($differences));
 	

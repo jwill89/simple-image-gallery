@@ -7,9 +7,8 @@ ini_set('display_errors', 1);
 require('vendor/autoload.php');
 
 // DB and Image functions
-use Gallery\Collections\{ImageCollection, VideoCollection};
-use Gallery\Objects\{Image, Video};
-use Gallery\Config;
+use Gallery\Collection\{ImageCollection, VideoCollection};
+use Gallery\Structure\{Image, Video};
 
 // Set Time Limit for Script, 10 minutes
 set_time_limit(600);
@@ -22,34 +21,34 @@ $image_collection = new ImageCollection();
 $video_collection = new VideoCollection();
 
 // Image Directory
-$image_dir_full = Config::IMAGE_DIR . "full/";
-$image_dir_thumbs = Config::IMAGE_DIR . "thumbs/";
+$image_dir_full = ImageCollection::IMAGE_DIRECTORY_FULL;
+$image_dir_thumbs = ImageCollection::IMAGE_DIRECTORY_THUMBNAILS;
 
 // Video Directory
-$video_dir_full = Config::VIDEO_DIR . "full/";
-$video_dir_thumbs = Config::VIDEO_DIR . "thumbs/";
+$video_dir_full = VideoCollection::VIDEO_DIRECTORY_FULL;
+$video_dir_thumbs = VideoCollection::VIDEO_DIRECTORY_THUMBNAILS;
 
 // Get the images in the folder
-$images_in_folder = array_filter(scandir(Config::IMAGE_DIR), function($item) {
-    return !is_dir(Config::IMAGE_DIR . $item);
+$images_in_folder = array_filter(scandir(ImageCollection::IMAGE_DIRECTORY), function($item) {
+    return !is_dir(ImageCollection::IMAGE_DIRECTORY . $item);
 });
 
 // Sort images by date
 usort($images_in_folder, function ($a, $b) {
-    return filemtime(Config::IMAGE_DIR . $a) <=> filemtime(Config::IMAGE_DIR . $b);
+    return filemtime(ImageCollection::IMAGE_DIRECTORY . $a) <=> filemtime(ImageCollection::IMAGE_DIRECTORY . $b);
 });
 
 // Get the images already in the database
-$images_in_database = $image_collection->getAllImages();
+$images_in_database = $image_collection->getAll();
 
 // Get the videos in the folder
-$videos_in_folder = array_filter(scandir(Config::VIDEO_DIR), function($item) {
-    return !is_dir(Config::VIDEO_DIR . $item);
+$videos_in_folder = array_filter(scandir(VideoCollection::VIDEO_DIRECTORY), function($item) {
+    return !is_dir(VideoCollection::VIDEO_DIRECTORY . $item);
 });
 
 // Sort videos by date
 usort($videos_in_folder, function ($a, $b) {
-    return filemtime(Config::VIDEO_DIR . $a) <=> filemtime(Config::VIDEO_DIR . $b);
+    return filemtime(VideoCollection::VIDEO_DIRECTORY . $a) <=> filemtime(VideoCollection::VIDEO_DIRECTORY . $b);
 });
 
 // Initialize Counters
@@ -63,24 +62,26 @@ $videos_not_added = 0;
 $image_hashes = [];
 
 // Remove images from the database that do not exist in the images folder
+/** @var Image $img */
+
 foreach($images_in_database as $img) {
 
-    if (!file_exists($image_dir_full . $img['filename'])) {
+    if (!file_exists($image_dir_full . $img->getFilename())) {
 
         // Delete from DB
-        $image = new Image($img['filename']);
-		$image->delete();
-
-		$images_removed++;
+        if ($image_collection->delete($img)) {
+			$images_removed++;
+		}
 
     } else {
 		
 		// Image Exists, add it to our hash array
-		$hash_array[] = $img['hash'];
+		$hash_array[] = $img->getHash();
 		
 	}
 
 }
+
 
 /*
 // Remove videos from the database that do not exist in the videos folder
@@ -104,33 +105,33 @@ foreach($videos_in_database as $key => $filename) {
 foreach($images_in_folder as $filename){
 
     // Check if the MD5 Hash already exists
-    $image_md5 = md5_file(Config::IMAGE_DIR . $filename);
+    $image_md5 = md5_file(ImageCollection::IMAGE_DIRECTORY . $filename);
 
     // Make sure the file doesn't already exist, check by MD5. Image Hash not necessary *yet*
     if (!in_array($image_md5, $hash_array)) {
 
         // Create the Image
-		$image = new Image($filename);
+		$image = new Image();
+		$image->setFilename($filename)
+			->setFiletime(filemtime(ImageCollection::IMAGE_DIRECTORY . $filename))
+			->setHash($image_md5);
 		
 		// Save the image (auto-creates thumbnail on save)
-		if ($image->save() !== 0) {
-			
+		if ($image_collection->save($image) !== 0) {
 			// Move the File to the full directory.
-			rename(Config::IMAGE_DIR . $filename, $image_dir_full . $filename);
+			rename(ImageCollection::IMAGE_DIRECTORY . $filename, $image_dir_full . $filename);
 
 			// Increase the Images Added Count
 			$images_added++;
-			
 		} else {
-			
+			// Increase the Images Not Added Count
 			$images_not_added++;
-			
 		}
 
 	} else {
 
 		// Delete File
-		$full_file = Config::IMAGE_DIR . $filename;
+		$full_file = ImageCollection::IMAGE_DIRECTORY . $filename;
 		unlink($full_file);
 
 		$images_not_added++;
@@ -147,24 +148,32 @@ foreach ($videos_in_folder as $filename) {
 	
 	
 	// Ensure the Video Doesn't Exist
-	if (!file_exists(Config::VIDEO_DIR . $filename)) {
+	if (!file_exists(VideoCollection::VIDEO_DIRECTORY . $filename)) {
 		
 		// Create a new video
-		$video = new Video($filename);
+		$video = new Video();
+		$video->setFilename($filename)
+			->setFiletime(filemtime(VideoCollection::VIDEO_DIRECTORY . $filename));
 	
-		// Save the Video
-		$video->save();
+		// Save the video
+		if ($video_collection->save($video) !== 0) {
+			// Move the File to the full directory.
+			rename(ImageCollection::IMAGE_DIRECTORY . $filename, $image_dir_full . $filename);
+
+			// Increase the Videos Added Count
+			$videos_added++;
+		} else {
+			// Increase the Videos Not Added Count
+			$videos_not_added++;
+		}
 
 		// Move the File to the full directory. This will save time not re-scanning all images.
-		rename(Config::VIDEO_DIR . $filename, $video_dir_full . $filename);
-
-		// Increase the Video Added Count
-		$videos_added++;
+		rename(VideoCollection::VIDEO_DIRECTORY . $filename, $video_dir_full . $filename);
 	
 	} else {
 		
 		// Delete File
-        $full_file = Config::VIDEO_DIR . $filename;
+        $full_file = VideoCollection::VIDEO_DIRECTORY . $filename;
         unlink($full_file);
 
         $videos_not_added++;

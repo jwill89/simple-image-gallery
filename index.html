@@ -1,153 +1,151 @@
 <!DOCTYPE html>
-<html lang="en" class="has-background-grey">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MathDad's Lewd Gallery</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gallery</title>
     <link rel="icon" type="image/png" href="favicon/icon.png" />
-    <link rel="stylesheet" type="text/css" href="css/bulma.css" />
-    <link rel="stylesheet" type="text/css" href="css/bulma.colors.extended.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
     <link rel="stylesheet" type="text/css" href="css/images.css" />
     <link rel="stylesheet" type="text/css" href="css/lightbox.css" />
-    <script type="text/javascript" src="js/jquery-3.7.0.min.js"></script>
-    <script type="text/javascript" src="js/lightbox-plus-jquery.js"></script>
+    <script type="text/javascript" src="js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="js/lightbox.min.js"></script>
     <script type="text/javascript" src="js/gallery.js"></script>
-    <script src="https://kit.fontawesome.com/87ab3ff454.js" crossorigin="anonymous"></script>
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', () => {
-
+        document.addEventListener("DOMContentLoaded", () => {
             // Get all "navbar-burger" elements
-            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            const $navbarBurgers = Array.prototype.slice.call(
+                document.querySelectorAll(".navbar-burger"),
+                0
+            );
 
             // Check if there are any navbar burgers
             if ($navbarBurgers.length > 0) {
-
                 // Add a click event on each of them
-                $navbarBurgers.forEach( el => {
-                    el.addEventListener('click', () => {
-
+                $navbarBurgers.forEach((el) => {
+                    el.addEventListener("click", () => {
                         // Get the target from the "data-target" attribute
                         const target = el.dataset.target;
                         const $target = document.getElementById(target);
 
                         // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-                        el.classList.toggle('is-active');
-                        $target.classList.toggle('is-active');
-
+                        el.classList.toggle("is-active");
+                        $target.classList.toggle("is-active");
                     });
                 });
             }
-
         });
     </script>
 </head>
-<body class="has-background-eggplant">
-<!-- Content -->
-<section class="section">
-    <div class="container is-max-widescreen">
 
-        <!-- Navigation -->
-        <nav class="navbar has-background-eggplant has-text-white" role="navigation" aria-label="main-menu">
+<body class="has-navbar-fixed-top">
+    <!-- Navigation -->
+    <nav class="navbar has-background-black-ter is-fixed-top" role="navigation" aria-label="main-menu">
+        <div class="navbar-brand">
+            <strong class="navbar-item"><strong>GALLERY</strong></strong>
 
-            <div class="navbar-brand has-background-eggplant has-text-white">
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
 
-                <strong class="navbar-item has-text-white">MATHDAD'S LEWD GALLERY</strong>
+        <div id="navMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link"> Images </a>
 
-                <a role="button" class="navbar-burger has-text-white" aria-label="menu" aria-expanded="false" data-target="navMenu">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
-            </div>
-
-            <div id="navMenu" class="navbar-menu has-background-eggplant has-text-white">
-                <div class="navbar-start">
-
-                    <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link has-background-eggplant has-text-white">
-                            Images
+                    <div class="navbar-dropdown">
+                        <a href="#" id="view-images-link" class="navbar-item">
+                            View Pages
                         </a>
-
-                        <div class="navbar-dropdown has-background-eggplant has-text-white">
-                            <a href="#" id="view-images-link" class="navbar-item has-background-eggplant has-text-white">
-                                View Pages
-                            </a>
-                            <a href="#" id="view-all-images-link" class="navbar-item has-background-eggplant has-text-white">
-                                View All
-                            </a>
-                            <a href="#" id="tags-link" class="navbar-item has-background-eggplant has-text-white">
-                                Tags
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link has-background-eggplant has-text-white">
-                            Videos
+                        <a href="#" id="view-all-images-link" class="navbar-item">
+                            View All
                         </a>
-
-                        <div class="navbar-dropdown has-background-eggplant has-text-white">
-                            <a href="#" id="view-videos-link" class="navbar-item has-background-eggplant has-text-white">
-                                View Pages
-                            </a>
-                            <a href="#" id="view-all-videos-link" class="navbar-item has-background-eggplant has-text-white">
-                                View All
-                            </a>
-                        </div>
+                        <a href="#" id="tags-link" class="navbar-item"> Tags </a>
                     </div>
                 </div>
 
-                <div class="navbar-end">
-                    <div class="navbar-item">
-                        <form name="form_search" id="form_search">
-                            <div class="field has-addons">
-                                <div class="control">
-                                    <input class="input" title="Tag List" type="text" name="search_term" placeholder="Search for a tag" list="tags">
-                                    <datalist id="tags">
-                                        <?php foreach (Tags::getAllTags() as $tag) { ?>
-                                        <option value="<?=$tag->tag;?>">
-                                            <?php } ?>
-                                    </datalist>
-                                </div>
-                                <div class="control">
-                                    <button name="submit" value="Search" class="button has-background-cadet-grey">Search</button>
-                                </div>
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link"> Videos </a>
+
+                    <div class="navbar-dropdown">
+                        <a href="#" id="view-videos-link" class="navbar-item">
+                            View Pages
+                        </a>
+                        <a href="#" id="view-all-videos-link" class="navbar-item">
+                            View All
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <form name="form_search" id="form_search">
+                        <div class="field has-addons">
+                            <div class="control">
+                                <input class="input" title="Tag List" type="text" name="search_term"
+                                    placeholder="Search for a tag" list="tags" />
+                                <datalist id="tags">
+                                    <?php foreach (TagCollection::getAllTags() as $tag) { ?>
+                                    <option value="<?=$tag->tag;?>">
+                                        <?php } ?>
+                                    </option>
+                                </datalist>
                             </div>
-                        </form>
-                    </div>
-                    <div class="navbar-item">
-                        <div class="buttons">
-                            <a class="button is-primary has-background-van-dyke has-text-white">
-                                <strong>Total: <span id="total"></span></strong>
-                            </a>
+                            <div class="control">
+                                <button name="submit" value="Search" class="button">
+                                    Search
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            </div>
-        </nav>
-
-        <!-- Pagination -->
-        <div id="pagination-top"></div>
-
-        <div class="columns is-flex-direction-column" style="min-height:75vh;">
-            <div class="column">
-                <div class="columns" id="content-display">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-primary">
+                            <strong>Total: <span id="total"></span></strong>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+    </nav>
+    <!-- Content -->
+    <section class="section">
+        <div class="container">
+            <!-- Pagination -->
+            <div id="pagination-top"></div>
 
-        <!-- Pagination -->
-        <div id="pagination-bottom"></div>
+            <div class="columns is-flex-direction-column" style="min-height: 75vh">
+                <div class="column">
+                    <div class="columns" id="content-display"></div>
+                </div>
+            </div>
 
-    </div>
-</section>
-<footer class="footer has-background-taupe-grey has-text-white has-text-centered">
-    <div class="block">
-        Programmed by MathDad. Utilizes the <a href="https://bulma.io/" target="_blank">Bulma</a> CSS Framework.<br/>
-        Repository on <a href="https://github.com/jwill89/simple-image-gallery/">GitHub</a>. The source code is licensed
-        under the <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a> license.<br/> All images
-        are owned by their respective creators.<br/> All rights to characters used in images are reserved to the copyright owners.
-    </div>
-</footer>
+            <!-- Pagination -->
+            <div id="pagination-bottom"></div>
+        </div>
+    </section>
+    <footer class="footer has-text-centered">
+        <div class="block">
+            Programmed by
+            <a href="https://www.mathdad.me" target="_blank">MathDad</a>. Utilizes
+            the <a href="https://bulma.io/" target="_blank">Bulma</a> CSS
+            Framework.<br />
+            Repository on
+            <a href="https://github.com/jwill89/simple-image-gallery/">GitHub</a>.
+            The source code is licensed under the
+            <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>
+            license.<br />
+            All images are owned by their respective creators.<br />
+            All rights to characters used in images are reserved to the copyright
+            owners.
+        </div>
+    </footer>
 </body>
+
 </html>

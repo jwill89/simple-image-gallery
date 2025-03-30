@@ -48,6 +48,7 @@ function GalleryInit()
         dataType: 'json',
         success: function (result) {
             window.sessionStorage.PageTitle = result;
+            document.title = result;
         }
     });
 }
@@ -80,7 +81,7 @@ function GalleryContent()
         if (ViewAll === false) {
             apiLink = "/images/page/" + CurrentPage + "/";
         } else {
-            apiLink = "/images/all/";
+            apiLink = "/images/";
         }
         $.ajax({
             url: API_LINK + apiLink,
@@ -94,26 +95,26 @@ function GalleryContent()
                 results.forEach((image) => {
                     content += "" +
                         "<div class='is-flex is-align-self-flex-end'>" +
-                        "   <div class='card child has-background-taupe-grey has-border-white'>" +
-                        "       <div class='card-content has-text-centered'>" +
+                        "   <div class='card child has-border-white'>" +
+                        "       <div class='card-content has-text-centered has-background-grey-darker'>" +
                         "           <figure class='image'>" +
                         "               <img alt='' src=\"images/thumbs/" + image.filename + "\" />" +
                         "           </figure>" +
                         "       </div>" +
-                        "       <footer class='card-footer'>" +
+                        "       <footer class='card-footer has-background-light'>" +
                         "           <a href=\"images/full/" + image.filename + "\" class='card-footer-item' data-lightbox=\"page-images\" data-title=\"Tags List Coming Soon\">" +
-                        "               <span class='icon has-text-jordy-blue'>" +
-                        "                   <i class='fa-sharp fa-solid fa-magnifying-glass-plus' title='Zoom In'></i>" +
+                        "               <span class='icon has-text-info-dark'>" +
+                        "                   <i class='fa-solid fa-magnifying-glass-plus' title='Zoom In'></i>" +
                         "               </span>" +
                         "           </a>" +
                         "           <a href=\"images/full/" + image.filename + "\" target='_blank' class='card-footer-item'>" +
-                        "               <span class='icon has-text-jordy-blue'>" +
-                        "                   <i class='fa-sharp fa-solid fa-up-right-from-square' title='View Full Size'></i>" +
+                        "               <span class='icon has-text-info-dark'>" +
+                        "                   <i class='fa-solid fa-up-right-from-square' title='View Full Size'></i>" +
                         "               </span>" +
                         "           </a>" +
                         "           <a href='#' data-id='" + image.id + "' class='card-footer-item'>" +
-                        "               <span class='icon has-text-jordy-blue'>" +
-                        "                   <i class='fa-sharp fa-solid fa-tags' title='Add/View Tags'></i>" +
+                        "               <span class='icon has-text-info-dark'>" +
+                        "                   <i class='fa-solid fa-tags' title='Add/View Tags'></i>" +
                         "               </span>" +
                         "           </a>" +
                         "       </footer>" +
@@ -150,7 +151,7 @@ function GalleryContent()
         if (ViewAll === false) {
             apiLink = "/videos/page/" + CurrentPage + "/";
         } else {
-            apiLink = "/videos/all/";
+            apiLink = "/videos/";
         }
         $.ajax({
             url: API_LINK + apiLink,
@@ -164,7 +165,7 @@ function GalleryContent()
                 results.forEach((video) => {
                     let thumbnail = video.filename.split('.').slice(0, -1).join('.') + '.jpg';
                     content += "" +
-                        "   <div class='card child' style='background-color:#c4c4c4;'>" +
+                        "   <div class='card child'>" +
                         "       <div class='card-image'>" +
                         "           <a href=\"videos/full/" + video.filename + "\" data-lightbox=\"page-videos\" data-title=\"<a href='videos/full/" + video.filename + "' target='_blank'>View Video in New Tab</a>\">" +
                         "           <img alt='' src=\"videos/thumbs/" + thumbnail + "\" /></a>" +
@@ -219,18 +220,18 @@ function GalleryPagination()
             TotalPages = result;
 
             // Start Pagination
-            pagination = "<nav class='pagination is-centered has-background-eggplant' role='navigation' aria-label='pagination'>"
+            pagination = "<nav class='pagination is-centered' role='navigation' aria-label='pagination'>"
 
             // Do we have an enabled previous page? (Page > 1)
             if (CurrentPage > 1) {
-                pagination += "<a href='#' id='page-prev' class='pagination-previous has-background-white'>Previous</a>";
+                pagination += "<a href='#' id='page-prev' class='pagination-previous'>Previous</a>";
             } else {
                 pagination += "<a class='pagination-previous' disabled>Previous</a>";
             }
 
             // Do we have an Enabled Next page? (Page < Total Pages)
             if (CurrentPage < TotalPages) {
-                pagination += "<a href='#' id='page-next' class='pagination-next has-background-white'>Next</a>";
+                pagination += "<a href='#' id='page-next' class='pagination-next'>Next</a>";
             } else {
                 pagination += "<a class='pagination-next' disabled>Next</a>";
             }
@@ -240,27 +241,27 @@ function GalleryPagination()
 
             // Add Page 1 and Ellipses if We're on page 3 or more
             if (CurrentPage >= 3) {
-                pagination += "<li><a href='#' data-page='1' class='pagination-link has-background-white' aria-label='Goto page 1'>1</a></li>";
+                pagination += "<li><a href='#' data-page='1' class='pagination-link' aria-label='Goto page 1'>1</a></li>";
                 pagination += "<li><span class='pagination-ellipsis'>&hellip;</span></li>";
             }
 
             // Previous Page if page > 1
             if (CurrentPage >= 2) {
-                pagination += "<li><a href='#' data-page='" + LastPage + "' class='pagination-link has-background-white' aria-label='Goto page " + LastPage + "'>" + LastPage + "</a></li>"
+                pagination += "<li><a href='#' data-page='" + LastPage + "' class='pagination-link' aria-label='Goto page " + LastPage + "'>" + LastPage + "</a></li>"
             }
 
             // Current Page
-            pagination += "<li><a class='pagination-link has-background-cadet-grey has-text-white' aria-label='Page " + CurrentPage + "' aria-current='page'>" + CurrentPage + "</a></li>"
+            pagination += "<li><a class='pagination-link is-current' aria-label='Page " + CurrentPage + "' aria-current='page'>" + CurrentPage + "</a></li>"
 
             // Next Page if Page < Total Pages
             if (CurrentPage < TotalPages) {
-                pagination += "<li><a href='#' data-page='" + NextPage + "' class='pagination-link has-background-white' aria-label='Goto page " + NextPage + "'>" + NextPage + "</a></li>"
+                pagination += "<li><a href='#' data-page='" + NextPage + "' class='pagination-link' aria-label='Goto page " + NextPage + "'>" + NextPage + "</a></li>"
             }
 
             // Add Ellipses and Last Page if We're on last page - 2
             if (CurrentPage <= (TotalPages - 2)) {
                 pagination += "<li><span class='pagination-ellipsis'>&hellip;</span></li>";
-                pagination += "<li><a href='#' data-page='" + TotalPages + "' class='pagination-link has-background-white' aria-label='Goto page " + TotalPages + "'>" + TotalPages + "</a></li>"
+                pagination += "<li><a href='#' data-page='" + TotalPages + "' class='pagination-link' aria-label='Goto page " + TotalPages + "'>" + TotalPages + "</a></li>"
             }
 
             // Finish Pagination
