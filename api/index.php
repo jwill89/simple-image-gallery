@@ -3,7 +3,18 @@
 // Required Autoloader
 require_once('../vendor/autoload.php');
 
+use DI\Container;
 use Slim\Factory\AppFactory;
+use Slim\Routing\RouteCollectorProxy;
+use Routes\Internal\ImageController;
+use Routes\Internal\VideoController;
+use Routes\Internal\PageController;
+
+// Create Container using PHP-DI
+$container = new Container();
+
+// Register Container
+AppFactory::setContainer($container);
 
 // Setup the App and Log
 $app = AppFactory::create();
@@ -11,31 +22,45 @@ $app = AppFactory::create();
 // Set Base Path
 $app->setBasePath("/api");
 
-// Setup Routing Middleware
+// Setup Middleware
+$app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
 
 // Setup Error Middleware
-$errorMiddleware = $app->addErrorMiddleware(true, true, true);
+$error_middleware = $app->addErrorMiddleware(true, true, true);
 
-// Images
-$image_handler = new \Routes\Images($app);
-$image_handler->getImage();
-$image_handler->getImagesForPage();
-$image_handler->getAllImages();
-$image_handler->getTotalImages();
+// Setup Allowables and Response Origins
+$app->add(function($request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+        ->withHeader('X-Frame-Options', 'SAMEORIGIN');
+});
 
-// Videos
-$video_handler = new \Routes\Videos($app);
-$video_handler->getVideo();
-$video_handler->getVideosForPage();
-$video_handler->getAllVideos();
-$video_handler->getTotalVideos();
+// Image Controllers
+$app->group('/images', function (RouteCollectorProxy $group) {
+    $group->get('/page/{page}[/]', ImageController::class . ':getImagesForPage');
+    $group->get('/tag/{tag}[/]', ImageController::class . ':getImagesForTag');
+    $group->get('/total[/]', ImageController::class . ':getTotalImages');
+    $group->get('/[{image_id}[/]]', ImageController::class . ':getImage');
+});
 
-// Pages
-$pages_handler = new \Routes\Pages($app);
-$pages_handler->getPageTitle();
-$pages_handler->getImagePages();
-$pages_handler->getVideoPages();
+// Video Controllers
+$app->group('/videos', function (RouteCollectorProxy $group) {
+    $group->get('/page/{page}[/]', VideoController::class . ':getVideosForPage');
+    $group->get('/tag/{tag}[/]', VideoController::class . ':getVideosForTag');
+    $group->get('/total[/]', VideoController::class . ':getTotalVideos');
+    $group->get('/[{video_id}[/]]', VideoController::class . ':getVideo');
+});
+
+// Page Controllers
+$app->group('/pages', function (RouteCollectorProxy $group) {
+    $group->get('/images[/]', PageController::class . ':getTotalImagePages');
+    $group->get('/videos[/]', PageController::class . ':getTotalVideoPages');
+    $group->get('/title[/]', PageController::class . ':getGalleryTitle');
+});
 
 // Run the app
 $app->run();
