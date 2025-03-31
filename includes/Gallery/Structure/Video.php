@@ -5,54 +5,43 @@ namespace Gallery\Structure;
 /**
  * Video class
  * This class represents a video in the gallery.
- * It contains properties for the video ID, filename, filetime, and tags.
+ * It contains properties for the video ID, file name, and file time.
  */
 class Video extends AbstractStructure
 {
     // Properties
-    private int $id = 0;
-    private string $filename = '';
-    private int $filetime = 0;
-    private array $tags = [];
+    private int $video_id = 0;
+    private string $file_name = '';
+    private int $file_time = 0;
 
     /**
      * Get the ID of the video.
      * 
      * @return integer The ID of the video.
      */
-    public function getId(): int
+    public function getVideoId(): int
     {
-        return $this->id;
+        return $this->video_id;
     }
 
     /**
-     * Get the filename of the video.
+     * Get the file name of the video.
      *
-     * @return string The filename of the video.
+     * @return string The file name of the video.
      */
-    public function getFilename(): string
+    public function getFileName(): string
     {
-        return $this->filename;
+        return $this->file_name;
     }
 
     /**
-     * Get the filetime of the video.
+     * Get the file time of the video.
      *
-     * @return int The filetime as a Unix timestamp.
+     * @return int The file time as a Unix timestamp.
      */
-    public function getFiletime(): int
+    public function getFileTime(): int
     {
-        return $this->filetime;
-    }
-
-    /**
-     * Get the tags associated with the video.
-     *
-     * @return array An array of tags.
-     */
-    public function getTags(): array
-    {
-        return $this->tags;
+        return $this->file_time;
     }
 
     /**
@@ -61,45 +50,33 @@ class Video extends AbstractStructure
      * @param int $id The ID to set.
      * @return Video Returns the current instance for method chaining.
      */
-    public function setId(int $id): self
+    public function setVideoId(int $video_id): self
     {
-        $this->id = $id;
+        $this->video_id = $video_id;
         return $this;
     }
 
     /**
-     * Set the filename of the video.
+     * Set the file name of the video.
      *
-     * @param string $filename The filename to set.
+     * @param string $file_name The file name to set.
      * @return Video Returns the current instance for method chaining.
      */
-    public function setFilename(string $filename): self
+    public function setFileName(string $file_name): self
     {
-        $this->filename = $filename;
+        $this->file_name = $file_name;
         return $this;
     }
 
     /**
-     * Set the filetime of the video.
+     * Set the file time of the video.
      *
-     * @param int $filetime The filetime as a Unix timestamp.
+     * @param int $file_time The file time as a Unix timestamp.
      * @return Video Returns the current instance for method chaining.
      */
-    public function setFiletime(int $filetime): self
+    public function setFileTime(int $file_time): self
     {
-        $this->filetime = $filetime;
-        return $this;
-    }
-
-    /**
-     * Set the tags associated with the video.
-     *
-     * @param array $tags An array of tags to set.
-     * @return Video Returns the current instance for method chaining.
-     */
-    public function setTags(array $tags): self
-    {
-        $this->tags = $tags;
+        $this->file_time = $file_time;
         return $this;
     }
 }

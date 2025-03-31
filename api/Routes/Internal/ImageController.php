@@ -106,9 +106,47 @@ class ImageController extends AbstractController
         return $response->withJson($data, $status);
     }
 
-    public function getImagesForTag(Request $request, Response $response, array $args): void
+    /**
+     * getImagesWithTags function
+     * This function is used to get a collection of images based on the supplied tags.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return void
+     */
+    public function getImagesWithTags(Request $request, Response $response, array $args): Response
     {
-       // TODO: Implement getImagesForTag method
+        // Initialize Required Variables
+        $params = $request->getParsedBody();
+        $tag_list = explode(',', str_replace(' ', '', $this->parseParameters($params, 'tag_list', '')));
+
+        // Assume status OK
+        $status = 200;
+
+        // Default Data
+        $data = [];
+       
+        // Initialize Tag IDs for Collection Use
+        $tag_ids = [];
+
+        // Check the tags are valid
+        foreach ($tag_list as $tag_name) {
+            if (($tag = $this->tag_collection->getByName($tag_name)) !== null) {
+                $tag_ids[] = $tag->getTagId();
+            }
+        }
+
+        // Get the images with the tags
+        if (empty($tag_ids)) {
+            $data = ['error' => 'NoValidTagsSupplied'];
+            $status = 404;
+        } else {
+            $data = $this->image_collection->getWithTags($tag_ids);
+        }
+
+        // Return data as json with HTTP status response
+        return $response->withJson($data, $status);
     }
 
     /**

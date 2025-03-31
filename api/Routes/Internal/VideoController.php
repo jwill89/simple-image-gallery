@@ -106,9 +106,47 @@ class VideoController extends AbstractController
         return $response->withJson($data, $status);
     }
 
-    public function getVideosForTag(Request $request, Response $response, array $args): void
+    /**
+     * getVideosWithTags function
+     * This function is used to get a collection of videos with specific tags.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function getVideosWithTags(Request $request, Response $response, array $args): Response
     {
-       // TODO: Implement getVideosForTag method
+       // Initialize Required Variables
+       $params = $request->getParsedBody();
+       $tag_list = explode(',', str_replace(' ', '', $this->parseParameters($params, 'tag_list', '')));
+
+       // Assume status OK
+       $status = 200;
+
+       // Default Data
+       $data = [];
+      
+       // Initialize Tag IDs for Collection Use
+       $tag_ids = [];
+
+       // Check the tags are valid
+       foreach ($tag_list as $tag_name) {
+           if (($tag = $this->tag_collection->getByName($tag_name)) !== null) {
+               $tag_ids[] = $tag->getTagId();
+           }
+       }
+
+       // Get the images with the tags
+       if (empty($tag_ids)) {
+           $data = ['error' => 'NoValidTagsSupplied'];
+           $status = 404;
+       } else {
+           $data = $this->video_collection->getWithTags($tag_ids);
+       }
+
+       // Return data as json with HTTP status response
+       return $response->withJson($data, $status);
     }
 
     /**

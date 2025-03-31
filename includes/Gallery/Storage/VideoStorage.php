@@ -48,10 +48,10 @@ class VideoStorage
         $videos = [];
 
         // Check for Video ID for where clause
-        $where = ($video_id !== null) ? " WHERE id = :video_id" : "";
+        $where = ($video_id !== null) ? " WHERE video_id = :video_id" : "";
 
         // Setup the Query
-        $sql = "SELECT * FROM " . self::MAIN_TABLE . "$where ORDER BY id DESC";
+        $sql = "SELECT * FROM " . self::MAIN_TABLE . "$where ORDER BY video_id DESC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -82,16 +82,16 @@ class VideoStorage
     /**
      * Get video based on supplied file name.
      *
-     * @param string $filename
+     * @param string $file_name
      * @return Video|null
      */
-    public function retrieveByFilename(string $filename): ?Video
+    public function retrieveByFilename(string $file_name): ?Video
     {
         // Initialize Video
         $video = null;
 
         // Setup the Query
-        $sql = "SELECT * FROM " . self::MAIN_TABLE . "WHERE filename = :filename";
+        $sql = "SELECT * FROM " . self::MAIN_TABLE . "WHERE file_name = :file_name";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -99,7 +99,7 @@ class VideoStorage
         // If prepared successfully
         if ($stmt) {
             // Bind file name
-            $stmt->bindParam(':filename', $filename, PDO::PARAM_STR);
+            $stmt->bindParam(':file_name', $file_name, PDO::PARAM_STR);
 
             // Try executing
             if ($stmt->execute()) {
@@ -117,6 +117,48 @@ class VideoStorage
     }
 
     /**
+     * Returns an array of videos based on the supplied tag ids.
+     *
+     * @param array $tag_ids
+     * @return array
+     */
+    public function retrieveWithTags(array $tag_ids): array
+    {
+        // Initialize Videos
+        $images = [];
+
+        // Count the number of tags
+        $tag_count = count($tag_ids);
+
+        // Setup the Query
+        $sql = "SELECT vid.* FROM " . self::MAIN_TABLE . " vid
+                    LEFT JOIN " . self::TAGS_TABLE . " tag
+                    USING (video_id)
+                    WHERE tag.tag_id IN (" . implode(',', $tag_ids) . ")
+                    GROUP BY vid.video_id 
+                    HAVING COUNT(DISTINCT tag.tag_id) = :tag_count
+                    ORDER BY vid.video_id DESC";
+
+        // Prepare statement
+        $stmt = $this->db->prepare($sql);
+
+        // If prepared successfully
+        if ($stmt) {
+            // Bind the tag ID to the query
+            $stmt->bindParam(':tag_count', $tag_count, PDO::PARAM_INT);
+
+            // Try executing
+            if ($stmt->execute()) {
+                $images = $stmt->fetchAll(PDO::FETCH_CLASS, self::OBJ_CLASS);
+            }
+
+            $stmt->closeCursor();
+        }
+
+        return $images;
+    }
+
+    /**
      * Returns an array of videos based on the supplied tag.
      *
      * @param Tag $tag
@@ -128,7 +170,7 @@ class VideoStorage
         $videos = [];
 
         // Setup the Query
-        $sql = "SELECT vid.* FROM " . self::MAIN_TABLE . " vid LEFT JOIN " . self::TAGS_TABLE . " tag ON vid.id = tag.video_id WHERE tag.tag_id = :tag_id ORDER BY id DESC";
+        $sql = "SELECT vid.* FROM " . self::MAIN_TABLE . " vid LEFT JOIN " . self::TAGS_TABLE . " tag USING (video_id) WHERE tag.tag_id = :tag_id ORDER BY video_id DESC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -136,7 +178,7 @@ class VideoStorage
         // If prepared successfully
         if ($stmt) {
             // Bind the tag ID to the query
-            $stmt->bindValue(':tag_id', $tag->getId(), PDO::PARAM_INT);
+            $stmt->bindValue(':tag_id', $tag->getTagId(), PDO::PARAM_INT);
 
             // Try executing
             if ($stmt->execute()) {
@@ -164,7 +206,7 @@ class VideoStorage
         $offset = ($page_number - 1) * self::PER_PAGE;
 
         // Setup the Query
-        $sql = "SELECT * FROM " . self::MAIN_TABLE . " ORDER BY id DESC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM " . self::MAIN_TABLE . " ORDER BY video_id DESC LIMIT :limit OFFSET :offset";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -216,18 +258,18 @@ class VideoStorage
     }
 
     /**
-     * Check if a video exists in the database based on filename.
-     * @param string $filename 
+     * Check if a video exists in the database based on file name.
+     * @param string $file_name 
      * @return bool 
      * @throws PDOException 
      */
-    public function videoExistsInDatabase(string $filename): bool
+    public function videoExistsInDatabase(string $file_name): bool
     {
         // Initialize In Database
         $in_database = false;
 
         // Define First Query
-        $sql = "SELECT 1 FROM " . self::MAIN_TABLE . " WHERE filename = :filename LIMIT 1";
+        $sql = "SELECT 1 FROM " . self::MAIN_TABLE . " WHERE file_name = :file_name LIMIT 1";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -235,7 +277,7 @@ class VideoStorage
         // If statement prepared successfully
         if ($stmt) {
             // Bind parameters
-            $stmt->bindParam(':filename', $filename, PDO::PARAM_STR);
+            $stmt->bindParam(':file_name', $file_name, PDO::PARAM_STR);
 
             // Try executing
             if ($stmt->execute()) {
@@ -256,26 +298,26 @@ class VideoStorage
     public function store(Video $video): int
     {
         // Check if already exists
-        if (empty($video->getId())) {
-            $sql = "INSERT INTO " . self::MAIN_TABLE . " (filename, filetime) VALUES (:filename, :filetime)";
+        if (empty($video->getVideoId())) {
+            $sql = "INSERT INTO " . self::MAIN_TABLE . " (file_name, file_time) VALUES (:file_name, :file_time)";
 
             // Prepare statement
             $stmt = $this->db->prepare($sql);
 
             // Bind parameters
             if ($stmt) {
-                $stmt->bindValue(':filename', $video->getFilename(), PDO::PARAM_STR);
-                $stmt->bindValue(':filetime', $video->getFiletime(), PDO::PARAM_INT);
+                $stmt->bindValue(':file_name', $video->getFileName(), PDO::PARAM_STR);
+                $stmt->bindValue(':file_time', $video->getFileTime(), PDO::PARAM_INT);
 
                 // Execute statement
                 if ($stmt->execute()) {
                     // Get the last inserted ID
-                    $video->setId((int)$this->db->lastInsertId());
+                    $video->setVideoId((int)$this->db->lastInsertId());
                 }
             }
         }
 
-        return $video->getId();
+        return $video->getVideoId();
     }
 
     /**
@@ -290,7 +332,7 @@ class VideoStorage
         $success = false;
 
         // Setup the Query
-        $sql = "DELETE FROM " . self::MAIN_TABLE . " WHERE id = :video_id";
+        $sql = "DELETE FROM " . self::MAIN_TABLE . " WHERE video_id = :video_id";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -298,7 +340,7 @@ class VideoStorage
         // If prepared successfully
         if ($stmt) {
             // Bind the video ID to the query
-            $stmt->bindValue(':video_id', $video->getId(), PDO::PARAM_INT);
+            $stmt->bindValue(':video_id', $video->getVideoId(), PDO::PARAM_INT);
 
             // Try executing
             if ($stmt->execute()) {

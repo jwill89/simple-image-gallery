@@ -83,9 +83,9 @@ class PageController extends AbstractController
         // Default Data
         $data = [];
 
-        // Get total images
-        $total_images = $this->image_collection->totalImages();
-        $total_pages = (int)ceil($total_images / self::PER_PAGE);
+        // Get total videos
+        $total_videos = $this->video_collection->totalVideos();
+        $total_pages = (int)ceil($total_videos / self::PER_PAGE);
 
         // Set the return data
         $data = $total_pages;

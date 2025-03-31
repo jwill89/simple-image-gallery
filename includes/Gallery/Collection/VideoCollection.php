@@ -68,6 +68,17 @@ class VideoCollection
     }
 
     /**
+     * Gets a number of videos based on the supplied page number and tag ID.
+     *
+     * @param array $tag_ids
+     * @return array
+     */
+    public function getWithTags(array $tag_ids): array
+    {
+        return $this->storage->retrieveWithTags($tag_ids);
+    }
+
+    /**
      * Gets the total number of videos in the database.
      *
      * @return integer
@@ -86,7 +97,7 @@ class VideoCollection
         $max_size = 200;
 
         // Start New Thumbnail
-        $video = new Imagick(self::VIDEO_DIRECTORY . $video_obj->getFilename());
+        $video = new Imagick(self::VIDEO_DIRECTORY . $video_obj->getFileName());
 
         // If the video is wider
         if ($video->getImageHeight() <= $video->getImageWidth()) {
@@ -109,13 +120,13 @@ class VideoCollection
         $video->stripImage();
 
         // Start Thumbnail Write
-        $video_filename = pathinfo($video->getImageFilename());
+        $video_file_name = pathinfo($video->getImageFilename());
 
         // Extension fis the same as the original
-        $ext = $video_filename['extension'];
+        $ext = $video_file_name['extension'];
 
         // Write Thumbnail
-        $video->writeImage(self::VIDEO_DIRECTORY_THUMBNAILS . $video_filename['filename']. '.' . $ext);
+        $video->writeImage(self::VIDEO_DIRECTORY_THUMBNAILS . $video_file_name['filename']. '.' . $ext);
 
         $video->clear();
     }
@@ -153,8 +164,8 @@ class VideoCollection
 
         // Delete the video and thumbnail from the filesystem
         if ($success) {
-            $video_path = self::VIDEO_DIRECTORY . $video->getFilename();
-            $thumbnail_path = self::VIDEO_DIRECTORY_THUMBNAILS . $video->getFilename();
+            $video_path = self::VIDEO_DIRECTORY . $video->getFileName();
+            $thumbnail_path = self::VIDEO_DIRECTORY_THUMBNAILS . $video->getFileName();
 
             // Delete the video file
             if (file_exists($video_path)) {

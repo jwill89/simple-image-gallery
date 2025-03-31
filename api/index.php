@@ -8,6 +8,7 @@ use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
 use Routes\Internal\ImageController;
 use Routes\Internal\VideoController;
+use Routes\Internal\TagController;
 use Routes\Internal\PageController;
 
 // Create Container using PHP-DI
@@ -42,7 +43,7 @@ $app->add(function($request, $handler) {
 // Image Controllers
 $app->group('/images', function (RouteCollectorProxy $group) {
     $group->get('/page/{page}[/]', ImageController::class . ':getImagesForPage');
-    $group->get('/tag/{tag}[/]', ImageController::class . ':getImagesForTag');
+    $group->get('/with-tags[/]', ImageController::class . ':getImagesWithTags');
     $group->get('/total[/]', ImageController::class . ':getTotalImages');
     $group->get('/[{image_id}[/]]', ImageController::class . ':getImage');
 });
@@ -50,9 +51,20 @@ $app->group('/images', function (RouteCollectorProxy $group) {
 // Video Controllers
 $app->group('/videos', function (RouteCollectorProxy $group) {
     $group->get('/page/{page}[/]', VideoController::class . ':getVideosForPage');
-    $group->get('/tag/{tag}[/]', VideoController::class . ':getVideosForTag');
+    $group->get('/with-tags[/]', VideoController::class . ':getVideosWithTags');
     $group->get('/total[/]', VideoController::class . ':getTotalVideos');
     $group->get('/[{video_id}[/]]', VideoController::class . ':getVideo');
+});
+
+// Tag Controllers
+$app->group('/tag', function (RouteCollectorProxy $group) {
+    $group->get('/[{tag_id}[/]]', TagController::class . ':getTag');
+    $group->get('/for/image/{image_id}[/]', TagController::class . ':getTagsForImage');
+    $group->get('/for/video/{video_id}[/]', TagController::class . ':getTagsForVideo');
+    $group->put('/image/add[/]', TagController::class . ':addTagToImage');
+    $group->put('/image/remove[/]', TagController::class . ':removeTagFromImage');
+    $group->put('/video/add[/]', TagController::class . ':addTagToVideo');
+    $group->put('/video/remove[/]', TagController::class . ':removeTagFromVideo');
 });
 
 // Page Controllers

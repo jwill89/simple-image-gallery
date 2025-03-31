@@ -38,11 +38,11 @@ $images_in_folder = array_filter(scandir(ImageCollection::IMAGE_DIRECTORY_FULL),
 // Create folder hashes
 $folder_hashes = [];
 
-foreach ($images_in_folder as $key => $folder_filename) {
+foreach ($images_in_folder as $key => $folder_file_name) {
 	
 	try {
 	
-		$folder_hash = $hasher->hash(ImageCollection::IMAGE_DIRECTORY_FULL . $folder_filename);
+		$folder_hash = $hasher->hash(ImageCollection::IMAGE_DIRECTORY_FULL . $folder_file_name);
 		
 		$folder_hashes[$key] = $folder_hash;
 	
@@ -58,13 +58,13 @@ foreach ($images_in_database as $img) {
 	
 	try {
 	
-		$database_hash = $hasher->hash(ImageCollection::IMAGE_DIRECTORY_FULL . $img->getFilename());
+		$database_hash = $hasher->hash(ImageCollection::IMAGE_DIRECTORY_FULL . $img->getFileName());
 		
 		foreach ($folder_hashes as $key => $folder_hash) {
 					
 			if ($hasher->distance($database_hash, $folder_hash) <= 2) {
 				
-				$matches[] = [$img->getFilename(), $images_in_folder[$key]];
+				$matches[] = [$img->getFileName(), $images_in_folder[$key]];
 				
 			}
 			

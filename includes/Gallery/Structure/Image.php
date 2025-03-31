@@ -5,39 +5,38 @@ namespace Gallery\Structure;
 /**
  * Image class
  * This class represents an image in the gallery.
- * It contains properties for the image ID, filename, filetime, hash, and tags.
+ * It contains properties for the image ID, file name, file time, and md5 hash.
  */
 class Image extends AbstractStructure
 {
     // Properties
-    private int $id = 0;
-    private string $filename = '';
-    private int $filetime = 0;
+    private int $image_id = 0;
+    private string $file_name = '';
+    private int $file_time = 0;
     private string $hash = '';
-    private array $tags = [];
 
     /**
      * @return int
      */
-    public function getId(): int
+    public function getImageId(): int
     {
-        return $this->id;
+        return $this->image_id;
     }
 
     /**
      * @return string
      */
-    public function getFilename(): string
+    public function getFileName(): string
     {
-        return $this->filename;
+        return $this->file_name;
     }
 
     /**
      * @return int
      */
-    public function getFiletime(): int
+    public function getFileTime(): int
     {
-        return $this->filetime;
+        return $this->file_time;
     }
 
     /**
@@ -49,40 +48,32 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @return array
-     */
-    public function getTags(): array
-    {
-        return $this->tags;
-    }
-
-    /**
-     * @param int $id
+     * @param int $image_id
      * @return Image
      */
-    public function setId(int $id): self
+    public function setImageId(int $image_id): self
     {
-        $this->id = $id;
+        $this->image_id = $image_id;
         return $this;
     }
 
     /**
-     * @param string $filename
+     * @param string $file_name
      * @return Image
      */
-    public function setFilename(string $filename): self
+    public function setFileName(string $file_name): self
     {
-        $this->filename = $filename;
+        $this->file_name = $file_name;
         return $this;
     }
 
     /**
-     * @param int $filetime
+     * @param int $file_time
      * @return Image
      */
-    public function setFiletime(int $filetime): self
+    public function setFileTime(int $file_time): self
     {
-        $this->filetime = $filetime;
+        $this->file_time = $file_time;
         return $this;
     }
 
@@ -93,16 +84,6 @@ class Image extends AbstractStructure
     public function setHash(string $hash): self
     {
         $this->hash = $hash;
-        return $this;
-    }
-
-    /**
-     * @param array $tags
-     * @return Image
-     */
-    public function setTags(array $tags): self
-    {
-        $this->tags = $tags;
         return $this;
     }
 }

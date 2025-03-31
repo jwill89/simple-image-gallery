@@ -9,29 +9,17 @@ namespace Gallery\Structure;
 class Tag extends AbstractStructure
 {
     // Properties
-    private int $id = 0;
-    private string $tag = '';
+    private int $tag_id = 0;
+    private string $tag_name = '';
 
     /**
      * Get the ID of the tag.
      *
      * @return int
      */
-    public function getId(): int
+    public function getTagId(): int
     {
-        return $this->id;
-    }
-
-    /**
-     * Set the ID of the tag.
-     *
-     * @param int $id
-     * @return Tag
-     */
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-        return $this;
+        return $this->tag_id;
     }
 
     /**
@@ -39,20 +27,32 @@ class Tag extends AbstractStructure
      *
      * @return string
      */
-    public function getTag(): string
+    public function getTagName(): string
     {
-        return $this->tag;
+        return $this->tag_name;
+    }
+
+    /**
+     * Set the ID of the tag.
+     *
+     * @param int $tag_id
+     * @return Tag
+     */
+    public function setTagId(int $tag_id): self
+    {
+        $this->tag_id = $tag_id;
+        return $this;
     }
 
     /**
      * Set the tag name.
      *
-     * @param string $tag
+     * @param string $tag_name
      * @return Tag
      */
-    public function setTag(string $tag): self
+    public function setTagName(string $tag_name): self
     {
-        $this->tag = $tag;
+        $this->tag_name = $tag_name;
         return $this;
     }
 }

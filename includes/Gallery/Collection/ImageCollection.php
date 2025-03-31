@@ -67,6 +67,17 @@ class ImageCollection
     }
 
     /**
+     * Gets a number of images based on the supplied page number and tag ID.
+     *
+     * @param array $tag_ids
+     * @return array
+     */
+    public function getWithTags(array $tag_ids): array
+    {
+        return $this->storage->retrieveWithTags($tag_ids);
+    }
+
+    /**
      * Gets the total number of images in the database.
      *
      * @return integer
@@ -85,7 +96,7 @@ class ImageCollection
         $max_size = 200;
 
         // Start New Thumbnail
-        $image = new Imagick(self::IMAGE_DIRECTORY . $image_obj->getFilename());
+        $image = new Imagick(self::IMAGE_DIRECTORY . $image_obj->getFileName());
 
         // If the image is wider
         if ($image->getImageHeight() <= $image->getImageWidth()) {
@@ -108,13 +119,13 @@ class ImageCollection
         $image->stripImage();
 
         // Start Thumbnail Write
-        $image_filename = pathinfo($image->getImageFilename());
+        $image_file_name = pathinfo($image->getImageFilename());
 
         // Extension fis the same as the original
-        $ext = $image_filename['extension'];
+        $ext = $image_file_name['extension'];
 
         // Write Thumbnail
-        $image->writeImage(self::IMAGE_DIRECTORY_THUMBNAILS . $image_filename['filename']. '.' . $ext);
+        $image->writeImage(self::IMAGE_DIRECTORY_THUMBNAILS . $image_file_name['filename']. '.' . $ext);
 
         $image->clear();
     }
@@ -133,13 +144,13 @@ class ImageCollection
         // If we have an ID, we can assume it was successful and generate a thumbnail
         if ($image_id > 0) {
             // Set the ID of the image object to the ID returned from the database
-            $image->setId($image_id);
+            $image->setImageId($image_id);
 
             // Create a thumbnail for the image
             $this->createThumbnail($image);
         }
 
-        return $image->getId();
+        return $image->getImageId();
     }
 
     /**
@@ -155,8 +166,8 @@ class ImageCollection
 
         // Delete the image and thumbnail from the filesystem
         if ($success) {
-            $image_path = self::IMAGE_DIRECTORY . $image->getFilename();
-            $thumbnail_path = self::IMAGE_DIRECTORY_THUMBNAILS . $image->getFilename();
+            $image_path = self::IMAGE_DIRECTORY . $image->getFileName();
+            $thumbnail_path = self::IMAGE_DIRECTORY_THUMBNAILS . $image->getFileName();
 
             // Delete the image file
             if (file_exists($image_path)) {

@@ -66,7 +66,7 @@ $image_hashes = [];
 
 foreach($images_in_database as $img) {
 
-    if (!file_exists($image_dir_full . $img->getFilename())) {
+    if (!file_exists($image_dir_full . $img->getFileName())) {
 
         // Delete from DB
         if ($image_collection->delete($img)) {
@@ -85,12 +85,12 @@ foreach($images_in_database as $img) {
 
 /*
 // Remove videos from the database that do not exist in the videos folder
-foreach($videos_in_database as $key => $filename) {
+foreach($videos_in_database as $key => $file_name) {
 	
-	if (!file_exists($video_directory . $filename)) {
+	if (!file_exists($video_directory . $file_name)) {
 		
 		// Delete from DB
-		if ($db->deleteVideoByFilename($filename)) {
+		if ($db->deleteVideoByFilename($file_name)) {
 			
 			$videos_removed++;
 			
@@ -102,24 +102,24 @@ foreach($videos_in_database as $key => $filename) {
 */
 
 // Add New Images
-foreach($images_in_folder as $filename){
+foreach($images_in_folder as $file_name){
 
     // Check if the MD5 Hash already exists
-    $image_md5 = md5_file(ImageCollection::IMAGE_DIRECTORY . $filename);
+    $image_md5 = md5_file(ImageCollection::IMAGE_DIRECTORY . $file_name);
 
     // Make sure the file doesn't already exist, check by MD5. Image Hash not necessary *yet*
     if (!in_array($image_md5, $hash_array)) {
 
         // Create the Image
 		$image = new Image();
-		$image->setFilename($filename)
-			->setFiletime(filemtime(ImageCollection::IMAGE_DIRECTORY . $filename))
+		$image->setFileName($file_name)
+			->setFileTime(filemtime(ImageCollection::IMAGE_DIRECTORY . $file_name))
 			->setHash($image_md5);
 		
 		// Save the image (auto-creates thumbnail on save)
 		if ($image_collection->save($image) !== 0) {
 			// Move the File to the full directory.
-			rename(ImageCollection::IMAGE_DIRECTORY . $filename, $image_dir_full . $filename);
+			rename(ImageCollection::IMAGE_DIRECTORY . $file_name, $image_dir_full . $file_name);
 
 			// Increase the Images Added Count
 			$images_added++;
@@ -131,7 +131,7 @@ foreach($images_in_folder as $filename){
 	} else {
 
 		// Delete File
-		$full_file = ImageCollection::IMAGE_DIRECTORY . $filename;
+		$full_file = ImageCollection::IMAGE_DIRECTORY . $file_name;
 		unlink($full_file);
 
 		$images_not_added++;
@@ -143,22 +143,22 @@ foreach($images_in_folder as $filename){
 }
 
 // Loop Through Videos and GIFs
-foreach ($videos_in_folder as $filename) {
+foreach ($videos_in_folder as $file_name) {
 
 	
 	
 	// Ensure the Video Doesn't Exist
-	if (!file_exists(VideoCollection::VIDEO_DIRECTORY . $filename)) {
+	if (!file_exists(VideoCollection::VIDEO_DIRECTORY . $file_name)) {
 		
 		// Create a new video
 		$video = new Video();
-		$video->setFilename($filename)
-			->setFiletime(filemtime(VideoCollection::VIDEO_DIRECTORY . $filename));
+		$video->setFileName($file_name)
+			->setFileTime(filemtime(VideoCollection::VIDEO_DIRECTORY . $file_name));
 	
 		// Save the video
 		if ($video_collection->save($video) !== 0) {
 			// Move the File to the full directory.
-			rename(ImageCollection::IMAGE_DIRECTORY . $filename, $image_dir_full . $filename);
+			rename(ImageCollection::IMAGE_DIRECTORY . $file_name, $image_dir_full . $file_name);
 
 			// Increase the Videos Added Count
 			$videos_added++;
@@ -168,12 +168,12 @@ foreach ($videos_in_folder as $filename) {
 		}
 
 		// Move the File to the full directory. This will save time not re-scanning all images.
-		rename(VideoCollection::VIDEO_DIRECTORY . $filename, $video_dir_full . $filename);
+		rename(VideoCollection::VIDEO_DIRECTORY . $file_name, $video_dir_full . $file_name);
 	
 	} else {
 		
 		// Delete File
-        $full_file = VideoCollection::VIDEO_DIRECTORY . $filename;
+        $full_file = VideoCollection::VIDEO_DIRECTORY . $file_name;
         unlink($full_file);
 
         $videos_not_added++;
