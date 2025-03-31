@@ -18,8 +18,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Gallery\\": ["includes/", "includes/Gallery"],
-            "Routes\\": ["api/", "api/Routes"]
+            "Gallery\\": ["includes/Gallery"],
+            "Routes\\": ["api/Routes"]
         }
     },
     "require-dev": {
