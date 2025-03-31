@@ -10,6 +10,12 @@ $(document).ready(function () {
 
     // Bind Element Events
     GalleryBindings();
+
+    // Navbar Mobile Burger Menu Toggle
+    $('#nav_burger').on('click', function() {
+        $('#nav_burger').toggleClass('is-active');
+        $(".navbar-menu").toggleClass("is-active");
+    });
 });
 
 // Constants
@@ -98,21 +104,21 @@ function GalleryContent()
                         "   <div class='card child has-border-white'>" +
                         "       <div class='card-content has-text-centered has-background-grey-darker'>" +
                         "           <figure class='image'>" +
-                        "               <img alt='' src=\"images/thumbs/" + image.filename + "\" />" +
+                        "               <img alt='' src=\"images/thumbs/" + image.file_name + "\" />" +
                         "           </figure>" +
                         "       </div>" +
                         "       <footer class='card-footer has-background-light'>" +
-                        "           <a href=\"images/full/" + image.filename + "\" class='card-footer-item' data-lightbox=\"page-images\" data-title=\"Tags List Coming Soon\">" +
+                        "           <a href=\"images/full/" + image.file_name + "\" class='card-footer-item' data-lightbox=\"page-images\" data-title=\"Tags List Coming Soon\">" +
                         "               <span class='icon has-text-info-dark'>" +
                         "                   <i class='fa-solid fa-magnifying-glass-plus' title='Zoom In'></i>" +
                         "               </span>" +
                         "           </a>" +
-                        "           <a href=\"images/full/" + image.filename + "\" target='_blank' class='card-footer-item'>" +
+                        "           <a href=\"images/full/" + image.file_name + "\" target='_blank' class='card-footer-item'>" +
                         "               <span class='icon has-text-info-dark'>" +
                         "                   <i class='fa-solid fa-up-right-from-square' title='View Full Size'></i>" +
                         "               </span>" +
                         "           </a>" +
-                        "           <a href='#' data-id='" + image.id + "' class='card-footer-item'>" +
+                        "           <a href='#' data-id='" + image.image_id + "' class='card-footer-item'>" +
                         "               <span class='icon has-text-info-dark'>" +
                         "                   <i class='fa-solid fa-tags' title='Add/View Tags'></i>" +
                         "               </span>" +
@@ -163,15 +169,15 @@ function GalleryContent()
                     "   <div class='parent'>";
 
                 results.forEach((video) => {
-                    let thumbnail = video.filename.split('.').slice(0, -1).join('.') + '.jpg';
+                    let thumbnail = video.file_name.split('.').slice(0, -1).join('.') + '.jpg';
                     content += "" +
                         "   <div class='card child'>" +
                         "       <div class='card-image'>" +
-                        "           <a href=\"videos/full/" + video.filename + "\" data-lightbox=\"page-videos\" data-title=\"<a href='videos/full/" + video.filename + "' target='_blank'>View Video in New Tab</a>\">" +
+                        "           <a href=\"videos/full/" + video.file_name + "\" data-lightbox=\"page-videos\" data-title=\"<a href='videos/full/" + video.file_name + "' target='_blank'>View Video in New Tab</a>\">" +
                         "           <img alt='' src=\"videos/thumbs/" + thumbnail + "\" /></a>" +
                         "       </div>" +
                         "       <footer class='card-footer'>" +
-                        "           <a href='#' data-id='" + video.id + "' class='card-footer-item' style='padding:.1rem;'>Add Tags</a>" +
+                        "           <a href='#' data-id='" + video.video_id + "' class='card-footer-item' style='padding:.1rem;'>Add Tags</a>" +
                         "       </footer>" +
                         "   </div>";
                 });
@@ -344,6 +350,7 @@ function GalleryBindings()
         GalleryContent();
     });
 }
+// Set the Page Title
 function SetGalleryTitle()
 {
     let title = window.sessionStorage.PageTitle;
