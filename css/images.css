@@ -16,3 +16,9 @@
 .child {
     margin: 0 1rem 2rem 1rem;
 }
+
+.tags-page-img {
+    max-width: 300px;
+    filter: drop-shadow 3px 3px 5px black;
+    transition: drop-shadow .3s ease-in-out 0s;
+}
