@@ -63,11 +63,14 @@
                 <div class="navbar-item">
                     <form name="form_search" id="form_search">
                         <div class="field has-addons">
-                            <div class="control">
+                            <div class="control has-icons-left">
                                 <input class="input" title="Tag List" type="text" name="search_term"
-                                    placeholder="Search for a tag" list="tags" />
-                                <datalist id="tags">
+                                    placeholder="Search for tags, separate with a comma" list="search-list-tags" />
+                                <datalist class="datalist-for-tags" id="search-list-tags">
                                 </datalist>
+                                <span class="icon is-left">
+                                    <i class="fa-solid fa-tags"></i>
+                                </span>
                             </div>
                             <div class="control">
                                 <button name="submit" value="Search" class="button">
@@ -87,15 +90,15 @@
             </div>
         </div>
     </nav>
-    <!-- Content -->
-    <section class="section" id="gallery-content">
+    <!-- Gallery Content -->
+    <section class="section is-hidden" id="gallery-content">
         <div class="container">
             <!-- Pagination -->
             <div id="pagination-top"></div>
 
             <div class="columns is-flex-direction-column" style="min-height: 75vh">
                 <div class="column">
-                    <div class="columns" id="content-display"></div>
+                    <div class="columns" id="gallery-display"></div>
                 </div>
             </div>
 
@@ -103,15 +106,35 @@
             <div id="pagination-bottom"></div>
         </div>
     </section>
-    <section class="section" id="tags-content">
+    <!-- Image/Video Tags Content -->
+    <section class="section is-hidden" id="item-tags-content">
         <div class="container">
             <div class="columns">
                 <div class="column is-three-fifths">
-                    <figure class="image is-128x128">
+                    <figure class="image tags-page-img">
                         <img src="" id="tag-image" />
                     </figure>
                 </div>
                 <div class="column" id="tag-data">
+                    <div class="content">
+                        <button class="button is-link" id="back-to-gallery">
+                            <span class="icon">
+                                <i class="fa-solid fa-backward"></i>
+                              </span>
+                              <span>Back to Gallery</span>
+                        </button>
+                        <h2>Add More Tags</h2>
+                        <label class="label">Tags</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="text" name="add_tag" id="add_tag" placeholder="" value="" list="add-list-tags" />
+                            <span class="icon is-left">
+                                <i class="fa-solid fa-tags"></i>
+                            </span>
+                            <datalist class="datalist-for-tags" id="add-list-tags">
+                            </datalist>
+                        </div>
+                        <p class="help">Add tags. Multiple tag should be separate by a comma. If a tag does not exist, it will be created.</p>
+                    </div>
                     <div class="tags are-medium" id="tag-list">
                     </div>
                 </div>
