@@ -52,7 +52,7 @@ class TagStorage
         $where = ($tag_id !== null) ? " WHERE tag_id = :tag_id" : "";
 
         // Setup the Query
-        $sql = "SELECT * FROM " . self::MAIN_TABLE . "$where ORDER BY tag_id DESC";
+        $sql = "SELECT * FROM " . self::MAIN_TABLE . "$where ORDER BY tag_name ASC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -162,7 +162,7 @@ class TagStorage
         $tags = [];
 
         // Setup the Query
-        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt LEFT JOIN " . self::IMAGE_TAG_TABLE .  "it USING (image_id) WHERE it.image_id = :image_id";
+        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt LEFT JOIN " . self::IMAGE_TAG_TABLE .  " it USING (tag_id) WHERE it.image_id = :image_id ORDER BY tt.tag_name ASC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -196,7 +196,7 @@ class TagStorage
         $tags = [];
 
         // Setup the Query
-        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt LEFT JOIN " . self::VIDEO_TAG_TABLE .  "vt USING (video_id) WHERE vt.video_id = :video_id";
+        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt LEFT JOIN " . self::VIDEO_TAG_TABLE .  " vt USING (tag_id) WHERE vt.video_id = :video_id ORDER BY tt.tag_name ASC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
