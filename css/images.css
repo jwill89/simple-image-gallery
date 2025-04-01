@@ -22,3 +22,9 @@
     filter: drop-shadow 3px 3px 5px black;
     transition: drop-shadow .3s ease-in-out 0s;
 }
+
+.sticky-footer {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}

@@ -12,9 +12,6 @@ $(document).ready(function () {
     // Page Initialization
     PageInit();
 
-    // Set the Title
-    SetGalleryTitle();
-
     // Menu Bindings
     MenuBindings();
 
@@ -28,13 +25,27 @@ $(document).ready(function () {
 // Initialize the Page Data
 function PageInit()
 {
+    // Set gallery title
     getPageTitle().then((title) => {
         PAGE_TITLE = title;
+        $('#gallery-title').html(PAGE_TITLE);
+        document.title = PAGE_TITLE + ' - Images';
     });
 
+    // Load all current tags
     getTags().then((tags) => {
         CURRENT_TAGS = tags;
         setTagList(tags);
+    });
+
+    // Set total images in footer
+    getTotalImages().then((total) => {
+        $('#total-images').html(total);
+    });
+
+    // Set total videos in footer
+    getTotalVideos().then((total) => {
+        $('#total-videos').html(total);
     });
 
     // Set navbar bindings
@@ -54,11 +65,6 @@ function GalleryContent()
     galleryDisplay.empty();
 
     if (PAGE_TYPE === PAGE_IMAGES) {
-        // Total Images
-        getTotalImages().then(total => {
-            totalSpan.html(total);
-        });
-
         // Get The Images for the Page
         getImagesForPage(CurrentPage).then((images) => {
 
@@ -86,7 +92,7 @@ function GalleryContent()
                     "                   <i class='fa-solid fa-up-right-from-square' title='View Full Size'></i>" +
                     "               </span>" +
                     "           </a>" +
-                    "           <a href='#' data-id='" + image.image_id + "' class='card-footer-item link-tags-page'>" +
+                    "           <a data-id='" + image.image_id + "' class='card-footer-item link-tags-page'>" +
                     "               <span class='icon has-text-info-dark'>" +
                     "                   <i class='fa-solid fa-tags' title='Add/View Tags'></i>" +
                     "               </span>" +
@@ -108,11 +114,6 @@ function GalleryContent()
             gallerySection.removeClass('is-hidden');
         });
     } else if (PAGE_TYPE === PAGE_VIDEOS) {
-        // Total Videos
-        getTotalVideos().then(total => {
-            totalSpan.html(total);
-        });
-
         // Get The Videos for the Page
         getVideosForPage(CurrentPage).then((videos) => {
             content += "" +
@@ -128,7 +129,7 @@ function GalleryContent()
                     "           <img alt='' src=\"videos/thumbs/" + thumbnail + "\" /></a>" +
                     "       </div>" +
                     "       <footer class='card-footer'>" +
-                    "           <a href='#' data-id='" + video.video_id + "' class='card-footer-item' style='padding:.1rem;'>Add Tags</a>" +
+                    "           <a data-id='" + video.video_id + "' class='card-footer-item' style='padding:.1rem;'>Add Tags</a>" +
                     "       </footer>" +
                     "   </div>";
             })
@@ -175,14 +176,14 @@ function GalleryPagination()
 
         // Do we have an enabled previous page? (Page > 1)
         if (CURRENT_PAGE > 1) {
-            pagination += "<a href='#' id='page-prev' class='pagination-previous'>Previous</a>";
+            pagination += "<a id='page-prev' class='pagination-previous'>Previous</a>";
         } else {
             pagination += "<a class='pagination-previous' disabled>Previous</a>";
         }
 
         // Do we have an Enabled Next page? (Page < Total Pages)
         if (CURRENT_PAGE < TotalPages) {
-            pagination += "<a href='#' id='page-next' class='pagination-next'>Next</a>";
+            pagination += "<a id='page-next' class='pagination-next'>Next</a>";
         } else {
             pagination += "<a class='pagination-next' disabled>Next</a>";
         }
@@ -192,27 +193,27 @@ function GalleryPagination()
 
         // Add Page 1 and Ellipses if We're on page 3 or more
         if (CURRENT_PAGE >= 3) {
-            pagination += "<li><a href='#' data-page='1' class='pagination-link' aria-label='Goto page 1'>1</a></li>";
+            pagination += "<li><a data-page='1' class='pagination-link' aria-label='Goto page 1'>1</a></li>";
             pagination += "<li><span class='pagination-ellipsis'>&hellip;</span></li>";
         }
 
         // Previous Page if page > 1
         if (CURRENT_PAGE >= 2) {
-            pagination += "<li><a href='#' data-page='" + LastPage + "' class='pagination-link' aria-label='Goto page " + LastPage + "'>" + LastPage + "</a></li>"
+            pagination += "<li><a data-page='" + LastPage + "' class='pagination-link' aria-label='Goto page " + LastPage + "'>" + LastPage + "</a></li>"
         }
 
         // Current Page
-        pagination += "<li><a class='pagination-link is-current' aria-label='Page " + CURRENT_PAGE + "' aria-current='page'>" + CURRENT_PAGE + "</a></li>"
+        pagination += "<li><a data-page='" + CURRENT_PAGE + "' class='pagination-link is-current' aria-label='Page " + CURRENT_PAGE + "' aria-current='page'>" + CURRENT_PAGE + "</a></li>"
 
         // Next Page if Page < Total Pages
         if (CURRENT_PAGE < TotalPages) {
-            pagination += "<li><a href='#' data-page='" + NextPage + "' class='pagination-link' aria-label='Goto page " + NextPage + "'>" + NextPage + "</a></li>"
+            pagination += "<li><a data-page='" + NextPage + "' class='pagination-link' aria-label='Goto page " + NextPage + "'>" + NextPage + "</a></li>"
         }
 
         // Add Ellipses and Last Page if We're on last page - 2
         if (CURRENT_PAGE <= (TotalPages - 2)) {
             pagination += "<li><span class='pagination-ellipsis'>&hellip;</span></li>";
-            pagination += "<li><a href='#' data-page='" + TotalPages + "' class='pagination-link' aria-label='Goto page " + TotalPages + "'>" + TotalPages + "</a></li>"
+            pagination += "<li><a data-page='" + TotalPages + "' class='pagination-link' aria-label='Goto page " + TotalPages + "'>" + TotalPages + "</a></li>"
         }
 
         // Finish Pagination
@@ -267,7 +268,7 @@ function ImageTagContent(image_id)
 function MenuBindings()
 {
     // Navbar Mobile Burger Menu Toggle
-    $('#nav_burger').off('click').on('click', function(event) {
+    $('#nav_burger').on('click', function(event) {
         $('#nav_burger').toggleClass('is-active');
         $(".navbar-menu").toggleClass("is-active");
     });
@@ -277,23 +278,24 @@ function MenuBindings()
 function GalleryBindings()
 {
     // Pagination Links
-    $('.pagination-link').off('click').on('click', function (event) {
+    $('.pagination-link').on('click', function (event) {
         CURRENT_PAGE = $(this).data('page');
         GalleryContent();
     });
 
-    $('.pagination-next').off('click').on('click', function (event) {
+    $('.pagination-next').on('click', function (event) {
         CURRENT_PAGE = CURRENT_PAGE + 1;
         GalleryContent();
     });
 
-    $('.pagination-previous').off('click').on('click', function (event) {
+    $('.pagination-previous').on('click', function (event) {
         CURRENT_PAGE = CURRENT_PAGE - 1;
         GalleryContent();
     });
 
     // Main Links - Images
-    $('#view-images-link').off('click').on('click', function (event) {
+    $('#view-images-link').on('click', function (event) {
+        event.preventDefault();
         if (PAGE_TYPE === PAGE_VIDEOS) {
             CURRENT_PAGE = 1;
         }
@@ -302,7 +304,8 @@ function GalleryBindings()
         GalleryContent();
     });
 
-    $('#view-all-images-link').off('click').on('click', function (event) {
+    $('#view-all-images-link').on('click', function (event) {
+        event.preventDefault();
         if (PAGE_TYPE === PAGE_VIDEOS) {
             CURRENT_PAGE = 1;
         }
@@ -310,18 +313,8 @@ function GalleryBindings()
         PAGE_TYPE = PAGE_IMAGES;
         GalleryContent();
     });
-
-    $('#view-all-images-link').off('click').on('click', function (event) {
-        if (PAGE_TYPE === PAGE_VIDEOS) {
-            CURRENT_PAGE = 1;
-        }
-        VIEW_ALL = true;
-        PAGE_TYPE = PAGE_IMAGES;
-        GalleryContent();
-    });
-
     // Main Links - Videos
-    $('#view-videos-link').off('click').on('click', function (event) {
+    $('#view-videos-link').on('click', function (event) {
         if (PAGE_TYPE === PAGE_IMAGES) {
             CURRENT_PAGE = 1;
         }
@@ -330,7 +323,7 @@ function GalleryBindings()
         GalleryContent();
     });
 
-    $('#view-all-videos-link').off('click').on('click', function (event) {
+    $('#view-all-videos-link').on('click', function (event) {
         if (PAGE_TYPE === PAGE_IMAGES) {
             CURRENT_PAGE = 1;
         }
@@ -340,7 +333,7 @@ function GalleryBindings()
     });
 
     // Tag Links
-    $('.link-tags-page').off('click').on('click', function (event) {
+    $('.link-tags-page').on('click', function (event) {
         event.preventDefault();
         let itemID = $(this).data('id');
 
@@ -356,7 +349,7 @@ function GalleryBindings()
     });
 
     // Tag Back - Back to Gallery
-    $('#back-to-gallery').off('click').on('click', function (event) {
+    $('#back-to-gallery').on('click', function (event) {
         event.preventDefault();
         // Clear Image Source
         $('#tag-image').prop('src', '');
@@ -370,7 +363,7 @@ function GalleryBindings()
 }
 
 // Set the Page Title
-function SetGalleryTitle()
+function SetPageTitle()
 {
     let title = PAGE_TITLE
 
