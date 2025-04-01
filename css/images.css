@@ -18,7 +18,7 @@
 }
 
 .tags-page-img {
-    max-width: 300px;
+    max-width: fit-content;
     filter: drop-shadow 3px 3px 5px black;
     transition: drop-shadow .3s ease-in-out 0s;
 }
