@@ -12,19 +12,15 @@ $(document).ready(function () {
     // Page Initialization
     PageInit();
 
-    // Menu Bindings
-    MenuBindings();
-
-    // Generate Default Content (Image Page)
-    GalleryContent();
-
     // Bind Element Events
-    GalleryBindings();
+    NavigationBindings();
+
+    // Generate Default Content
+    GalleryContent();
 });
 
 // Initialize the Page Data
-function PageInit()
-{
+function PageInit() {
     // Set gallery title
     getPageTitle().then((title) => {
         PAGE_TITLE = title;
@@ -47,114 +43,161 @@ function PageInit()
     getTotalVideos().then((total) => {
         $('#total-videos').html(total);
     });
-
-    // Set navbar bindings
-    MenuBindings();
 }
 
-// Create Page
-function GalleryContent()
-{
+// Create Page Test
+function GalleryContent() {
     let gallerySection = $('#gallery-content');
     let galleryDisplay = $('#gallery-display');
-    let totalSpan = $('#total');
-    let content = "";
-    let CurrentPage = CURRENT_PAGE
-
-    // Clear the Old
-    galleryDisplay.empty();
+    let galleryPromise;
 
     if (PAGE_TYPE === PAGE_IMAGES) {
-        // Get The Images for the Page
-        getImagesForPage(CurrentPage).then((images) => {
-
-            content += "" +
-            "<div class='column is-full is-align-content-end'>" +
-            "   <div class='parent'>";
-
-            images.forEach(image => {
-                content += "" +
-                    "<div class='is-flex is-align-self-flex-end'>" +
-                    "   <div class='card child has-border-white'>" +
-                    "       <div class='card-content has-text-centered has-background-grey-darker'>" +
-                    "           <figure class='image'>" +
-                    "               <img alt='' src=\"images/thumbs/" + image.file_name + "\" />" +
-                    "           </figure>" +
-                    "       </div>" +
-                    "       <footer class='card-footer has-background-light'>" +
-                    "           <a href=\"images/full/" + image.file_name + "\" class='card-footer-item' data-lightbox=\"page-images\" data-title=\"Tags List Coming Soon\">" +
-                    "               <span class='icon has-text-info-dark'>" +
-                    "                   <i class='fa-solid fa-magnifying-glass-plus' title='Zoom In'></i>" +
-                    "               </span>" +
-                    "           </a>" +
-                    "           <a href=\"images/full/" + image.file_name + "\" id='image-full-" + image.image_id + "' target='_blank' class='card-footer-item'>" +
-                    "               <span class='icon has-text-info-dark'>" +
-                    "                   <i class='fa-solid fa-up-right-from-square' title='View Full Size'></i>" +
-                    "               </span>" +
-                    "           </a>" +
-                    "           <a data-id='" + image.image_id + "' class='card-footer-item link-tags-page'>" +
-                    "               <span class='icon has-text-info-dark'>" +
-                    "                   <i class='fa-solid fa-tags' title='Add/View Tags'></i>" +
-                    "               </span>" +
-                    "           </a>" +
-                    "       </footer>" +
-                    "   </div>" +
-                    " </div>";
-            });
-
-            content += "" +
-            "   </div>" +
-            "</div>" +
-            "<br/><br/>";
-
-            // Add the content to the display
-            galleryDisplay.append(content);
-
-            // Show the section
-            gallerySection.removeClass('is-hidden');
-        });
-    } else if (PAGE_TYPE === PAGE_VIDEOS) {
-        // Get The Videos for the Page
-        getVideosForPage(CurrentPage).then((videos) => {
-            content += "" +
-            "<div class='column'>" +
-            "   <div class='parent'>";
-
-            videos.forEach(video => {
-                let thumbnail = video.file_name.split('.').slice(0, -1).join('.') + '.jpg';
-                content += "" +
-                    "   <div class='card child'>" +
-                    "       <div class='card-image'>" +
-                    "           <a href=\"videos/full/" + video.file_name + "\" data-lightbox=\"page-videos\" data-title=\"<a href='videos/full/" + video.file_name + "' target='_blank'>View Video in New Tab</a>\">" +
-                    "           <img alt='' src=\"videos/thumbs/" + thumbnail + "\" /></a>" +
-                    "       </div>" +
-                    "       <footer class='card-footer'>" +
-                    "           <a data-id='" + video.video_id + "' class='card-footer-item' style='padding:.1rem;'>Add Tags</a>" +
-                    "       </footer>" +
-                    "   </div>";
-            })
-
-            content += "" +
-            "   </div>" +
-            "</div>" +
-            "<br/><br/>";
-
-            // Add the content to the display
-            galleryDisplay.append(content);
-
-            // Show the section
-            gallerySection.removeClass('is-hidden');
-        });
+        galleryPromise = getImagesForPage(CURRENT_PAGE);
+    } else {
+        galleryPromise = getVideosForPage(CURRENT_PAGE);
     }
 
-    // Generate Pagination if not viewing all
-    if (VIEW_ALL === false) {
-        GalleryPagination();
-    }
+    galleryPromise.then((items) => {
+
+        // Create the Container
+        // Column Div
+        columnDiv = document.createElement('div');
+        columnDiv.classList.add('column', 'is-full', 'is-align-content-end');
+
+        // Parent Div
+        parentDiv = document.createElement('div');
+        parentDiv.classList.add('parent');
+
+        // Append to Parent
+        columnDiv.appendChild(parentDiv);
+
+        // Loop Through Images/Videos
+        items.forEach(item => {
+
+            let item_id,
+                thumbnail_path,
+                full_path;
+
+            if (PAGE_TYPE === PAGE_IMAGES) {
+                item_id = item.image_id;
+                thumbnail_path = "images/thumbs/" + item.file_name;
+                full_path = "images/full/" + item.file_name;
+            } else {
+                item_id = item.video_id;
+                thumbnail_path = "videos/thumbs/" + item.file_name.split('.').slice(0, -1).join('.') + ".jpg";
+                full_path = "videos/full/" + item.file_name;
+            }
+
+            // Flex Div
+            flexDiv = document.createElement('div');
+            flexDiv.classList.add('is-flex', 'is-align-self-flex-end');
+
+            // Card Div
+            cardDiv = document.createElement('div');
+            cardDiv.classList.add('card', 'child', 'has-border-white');
+
+            // Card Content Div
+            cardContentDiv = document.createElement('div');
+            cardContentDiv.classList.add('card-content', 'has-text-centered', 'has-background-grey-darker');
+
+            // Card Figure
+            cardFigureDiv = document.createElement('figure');
+            cardFigureDiv.classList.add('image');
+
+            // Card Figure Image- Thumbnail
+            cardFigureImage = document.createElement('img');
+            cardFigureImage.setAttribute('alt', '');
+            cardFigureImage.setAttribute('src', thumbnail_path);
+
+            // Card Footer
+            cardFooterDiv = document.createElement('footer');
+            cardFooterDiv.classList.add('card-footer', 'has-background-light');
+
+            // Card Footer - Link - Lightbox
+            cardFooterLinkLightbox = document.createElement('a');
+            cardFooterLinkLightbox.classList.add('card-footer-item');
+            cardFooterLinkLightbox.setAttribute('href', full_path);
+            cardFooterLinkLightbox.setAttribute('data-lightbox', "page-items");
+            cardFooterLinkLightbox.setAttribute('data-title', "Tags List Coming Soon");
+
+            // Card Footer - Link - Lightbox - Span
+            cardFooterLinkLightboxSpan = document.createElement('span');
+            cardFooterLinkLightboxSpan.classList.add('icon', 'has-text-info-dark');
+
+            // Card Footer - Link - Lightbox - Span - Icon
+            cardFooterLinkLightboxSpanIcon = document.createElement('i');
+            cardFooterLinkLightboxSpanIcon.classList.add('fa-solid', 'fa-magnifying-glass-plus');
+            cardFooterLinkLightboxSpanIcon.setAttribute('title', 'Zoom In');
+
+            // Card Footer - Link - Full
+            cardFooterLinkFull = document.createElement('a');
+            cardFooterLinkFull.classList.add('card-footer-item');
+            cardFooterLinkFull.setAttribute('href', full_path);
+            cardFooterLinkFull.setAttribute('target', '_blank');
+            cardFooterLinkFull.setAttribute('id', 'item-full-' + item_id);
+
+            // Card Footer - Link - Full - Span
+            cardFooterLinkFullSpan = document.createElement('span');
+            cardFooterLinkFullSpan.classList.add('icon', 'has-text-info-dark');
+
+            // Card Footer - Link - Full - Span - Icon
+            cardFooterLinkFullSpanIcon = document.createElement('i');
+            cardFooterLinkFullSpanIcon.classList.add('fa-solid', 'fa-up-right-from-square');
+            cardFooterLinkFullSpanIcon.setAttribute('title', 'View Full Size in New Tab');
+
+            // Card Footer - Link - Tags
+            cardFooterLinkTags = document.createElement('a');
+            cardFooterLinkTags.classList.add('card-footer-item', 'link-tags-page');
+            cardFooterLinkTags.setAttribute('data-id', item_id);
+
+            // Card Footer - Link - Tags - Span
+            cardFooterLinkTagsSpan = document.createElement('span');
+            cardFooterLinkTagsSpan.classList.add('icon', 'has-text-info-dark');
+
+            // Card Footer - Link - Tags - Span - Icon
+            cardFooterLinkTagsSpanIcon = document.createElement('i');
+            cardFooterLinkTagsSpanIcon.classList.add('fa-solid', 'fa-tags');
+            cardFooterLinkTagsSpanIcon.setAttribute('title', 'Add/View Tags');
+
+            // Build Card
+            flexDiv.appendChild(cardDiv);
+            cardDiv.appendChild(cardContentDiv);
+            cardContentDiv.appendChild(cardFigureDiv);
+            cardFigureDiv.appendChild(cardFigureImage);
+            cardDiv.appendChild(cardFooterDiv);
+            cardFooterDiv.appendChild(cardFooterLinkLightbox);
+            cardFooterLinkLightbox.appendChild(cardFooterLinkLightboxSpan);
+            cardFooterLinkLightboxSpan.appendChild(cardFooterLinkLightboxSpanIcon);
+            cardFooterDiv.appendChild(cardFooterLinkFull);
+            cardFooterLinkFull.appendChild(cardFooterLinkFullSpan);
+            cardFooterLinkFullSpan.appendChild(cardFooterLinkFullSpanIcon);
+            cardFooterDiv.appendChild(cardFooterLinkTags);
+            cardFooterLinkTags.appendChild(cardFooterLinkTagsSpan);
+            cardFooterLinkTagsSpan.appendChild(cardFooterLinkTagsSpanIcon);
+
+            // Append to Parent
+            parentDiv.appendChild(flexDiv);
+
+        });
+
+        // Clear and Append New Page
+        galleryDisplay.empty().append(columnDiv);
+
+        // Show the Gallery Section
+        gallerySection.removeClass('is-hidden');
+
+        // Add Tag Bindings
+        GalleryBindings();
+
+        // Generate Pagination if not viewing all
+        if (VIEW_ALL === false) {
+            GalleryPagination();
+        }
+
+    });
 }
 
-function GalleryPagination()
-{
+function GalleryPagination() {
     let topDiv = $('#pagination-top');
     let bottomDiv = $('#pagination-bottom');
     let pagesPromise;
@@ -166,82 +209,138 @@ function GalleryPagination()
     }
 
     pagesPromise.then((result) => {
-        let pagination = "";
         let NextPage = CURRENT_PAGE + 1;
-        let LastPage = CURRENT_PAGE - 1;
+        let PreviousPage = CURRENT_PAGE - 1;
         let TotalPages = result;
 
-        // Start Pagination
-        pagination = "<nav class='pagination is-centered' role='navigation' aria-label='pagination'>"
+        // Pagination - Navigation
+        paginationTop = document.createElement('nav');
+        paginationTop.className = 'pagination is-centered';
+        paginationTop.setAttribute('role', 'navigation');
+        paginationTop.setAttribute('aria-label', 'pagination');
+
+        // Pagination - Navigation - Link - Previous
+        previousLink = document.createElement('a');
+        previousLink.innerHTML = 'Previous';
 
         // Do we have an enabled previous page? (Page > 1)
-        if (CURRENT_PAGE > 1) {
-            pagination += "<a id='page-prev' class='pagination-previous'>Previous</a>";
-        } else {
-            pagination += "<a class='pagination-previous' disabled>Previous</a>";
-        }
+        previousLink.className = (CURRENT_PAGE > 1) ? 'pagination-previous' : 'pagination-previous is-disabled';
 
-        // Do we have an Enabled Next page? (Page < Total Pages)
-        if (CURRENT_PAGE < TotalPages) {
-            pagination += "<a id='page-next' class='pagination-next'>Next</a>";
-        } else {
-            pagination += "<a class='pagination-next' disabled>Next</a>";
-        }
+        // Pagination - Navigation - Link - Next
+        nextLink = document.createElement('a');
+        nextLink.innerHTML = 'Next';
 
-        // Continue Pagination
-        pagination += "<ul class='pagination-list'>";
+        // Do we have an enabled next page? (Page < Total Pages)
+        nextLink.className = (CURRENT_PAGE < TotalPages) ? 'pagination-next' : 'pagination-next is-disabled';
+
+        // Pagination - Navigation - Links - Pages List
+        pageNumberList = document.createElement('ul');
+        pageNumberList.className = 'pagination-list';
+
+        // Pagination - Navigation - Links - Pages List - Ellipsis
+        listItemEllipsesEarly = document.createElement('li');
+        listItemEllipsesSpan = document.createElement('span');
+        listItemEllipsesSpan.className = 'pagination-ellipsis';
+        listItemEllipsesSpan.innerHTML = '&hellip;';
+        listItemEllipsesEarly.appendChild(listItemEllipsesSpan);
+        listItemEllipsesLate = listItemEllipsesEarly.cloneNode(true);
+
+        // Pagination - Navigation - Links - Pages List - List Element - 1
+        listItemPage1 = document.createElement('li');
+        listItemPage1Link = document.createElement('a');
+        listItemPage1Link.className = 'pagination-link';
+        listItemPage1Link.setAttribute('data-page', '1');
+        listItemPage1Link.setAttribute('aria-label', 'Goto page 1');
+        listItemPage1Link.innerHTML = '1';
+        listItemPage1.appendChild(listItemPage1Link);
+
+        // Pagination - Navigation - Links - Pages List - List Element - Previous
+        listItemPagePrevious = document.createElement('li');
+        listItemPagePreviousLink = document.createElement('a');
+        listItemPagePreviousLink.className = 'pagination-link';
+        listItemPagePreviousLink.setAttribute('data-page', PreviousPage);
+        listItemPagePreviousLink.setAttribute('aria-label', 'Goto page ' + PreviousPage);
+        listItemPagePreviousLink.innerHTML = PreviousPage;
+        listItemPagePrevious.appendChild(listItemPagePreviousLink);
+
+        // Pagination - Navigation - Links - Pages List - List Element - Current
+        listItemPageCurrent = document.createElement('li');
+        listItemPageCurrentLink = document.createElement('a');
+        listItemPageCurrentLink.className = 'pagination-link is-current';
+        listItemPageCurrentLink.setAttribute('data-page', CURRENT_PAGE);
+        listItemPageCurrentLink.setAttribute('aria-label', 'Page ' + CURRENT_PAGE);
+        listItemPageCurrentLink.setAttribute('aria-current', 'page');
+        listItemPageCurrentLink.innerHTML = CURRENT_PAGE;
+        listItemPageCurrent.appendChild(listItemPageCurrentLink);
+
+        // Pagination - Navigation - Links - Pages List - List Element - Next
+        listItemPageNext = document.createElement('li');
+        listItemPageNextLink = document.createElement('a');
+        listItemPageNextLink.className = 'pagination-link';
+        listItemPageNextLink.setAttribute('data-page', NextPage);
+        listItemPageNextLink.setAttribute('aria-label', 'Goto page ' + NextPage);
+        listItemPageNextLink.innerHTML = NextPage;
+        listItemPageNext.appendChild(listItemPageNextLink);
+
+        // Pagination - Navigation - Links - Pages List - List Element - Last
+        listItemPageLast = document.createElement('li');
+        listItemPageLastLink = document.createElement('a');
+        listItemPageLastLink.className = 'pagination-link';
+        listItemPageLastLink.setAttribute('data-page', TotalPages);
+        listItemPageLastLink.setAttribute('aria-label', 'Goto page ' + TotalPages);
+        listItemPageLastLink.innerHTML = TotalPages;
+        listItemPageLast.appendChild(listItemPageLastLink);
+
+        // BUild Pagination
+        paginationTop.appendChild(previousLink);
+        paginationTop.appendChild(nextLink);
+        paginationTop.appendChild(pageNumberList);
 
         // Add Page 1 and Ellipses if We're on page 3 or more
         if (CURRENT_PAGE >= 3) {
-            pagination += "<li><a data-page='1' class='pagination-link' aria-label='Goto page 1'>1</a></li>";
-            pagination += "<li><span class='pagination-ellipsis'>&hellip;</span></li>";
+            pageNumberList.appendChild(listItemPage1);
+            pageNumberList.appendChild(listItemEllipsesEarly);
         }
 
-        // Previous Page if page > 1
+        // Previous Page if page 2 or higher
         if (CURRENT_PAGE >= 2) {
-            pagination += "<li><a data-page='" + LastPage + "' class='pagination-link' aria-label='Goto page " + LastPage + "'>" + LastPage + "</a></li>"
+            pageNumberList.appendChild(listItemPagePrevious);
         }
 
         // Current Page
-        pagination += "<li><a data-page='" + CURRENT_PAGE + "' class='pagination-link is-current' aria-label='Page " + CURRENT_PAGE + "' aria-current='page'>" + CURRENT_PAGE + "</a></li>"
+        pageNumberList.appendChild(listItemPageCurrent);
 
         // Next Page if Page < Total Pages
         if (CURRENT_PAGE < TotalPages) {
-            pagination += "<li><a data-page='" + NextPage + "' class='pagination-link' aria-label='Goto page " + NextPage + "'>" + NextPage + "</a></li>"
+            pageNumberList.appendChild(listItemPageNext);
         }
 
         // Add Ellipses and Last Page if We're on last page - 2
         if (CURRENT_PAGE <= (TotalPages - 2)) {
-            pagination += "<li><span class='pagination-ellipsis'>&hellip;</span></li>";
-            pagination += "<li><a data-page='" + TotalPages + "' class='pagination-link' aria-label='Goto page " + TotalPages + "'>" + TotalPages + "</a></li>"
+            pageNumberList.appendChild(listItemEllipsesLate);
+            pageNumberList.appendChild(listItemPageLast);
         }
 
         // Finish Pagination
-        pagination += "</ul>";
-        pagination += "</nav>";
+        paginationTop.appendChild(pageNumberList);
 
-        // Render Pagination
+        // Clone for Button
+        paginationBottom = paginationTop.cloneNode(true);
 
         // Check to see if we have the elements
-        if (topDiv.length > 0) {
-            topDiv.replaceWith(pagination);
-            bottomDiv.replaceWith(pagination);
-        } else {
-            $('nav.pagination').replaceWith(pagination);
-        }
+        topDiv.empty().append(paginationTop);
+        bottomDiv.empty().append(paginationBottom);
 
-        // Bind Element Events
-        GalleryBindings();
+        // Bind Pagination Links
+        PaginationBindings();
     });
 }
 
-function TagContent()
-{
-
+function TagContent() {
+    // TODO:: This function
 }
 
-function ImageTagContent(image_id)
-{
+function ImageTagContent(image_id) {
     let contentDiv = $('#content-display');
     let content = "";
     let apiLink = "/tag/";
@@ -265,37 +364,16 @@ function ImageTagContent(image_id)
     });
 }
 
-function MenuBindings()
-{
+// Bind Navigation
+function NavigationBindings() {
     // Navbar Mobile Burger Menu Toggle
-    $('#nav_burger').on('click', function(event) {
+    $('#nav_burger').on('click', function (event) {
         $('#nav_burger').toggleClass('is-active');
         $(".navbar-menu").toggleClass("is-active");
-    });
-}
-
-// Bind Buttons
-function GalleryBindings()
-{
-    // Pagination Links
-    $('.pagination-link').on('click', function (event) {
-        CURRENT_PAGE = $(this).data('page');
-        GalleryContent();
-    });
-
-    $('.pagination-next').on('click', function (event) {
-        CURRENT_PAGE = CURRENT_PAGE + 1;
-        GalleryContent();
-    });
-
-    $('.pagination-previous').on('click', function (event) {
-        CURRENT_PAGE = CURRENT_PAGE - 1;
-        GalleryContent();
     });
 
     // Main Links - Images
     $('#view-images-link').on('click', function (event) {
-        event.preventDefault();
         if (PAGE_TYPE === PAGE_VIDEOS) {
             CURRENT_PAGE = 1;
         }
@@ -305,7 +383,6 @@ function GalleryBindings()
     });
 
     $('#view-all-images-link').on('click', function (event) {
-        event.preventDefault();
         if (PAGE_TYPE === PAGE_VIDEOS) {
             CURRENT_PAGE = 1;
         }
@@ -313,6 +390,7 @@ function GalleryBindings()
         PAGE_TYPE = PAGE_IMAGES;
         GalleryContent();
     });
+
     // Main Links - Videos
     $('#view-videos-link').on('click', function (event) {
         if (PAGE_TYPE === PAGE_IMAGES) {
@@ -332,25 +410,8 @@ function GalleryBindings()
         GalleryContent();
     });
 
-    // Tag Links
-    $('.link-tags-page').on('click', function (event) {
-        event.preventDefault();
-        let itemID = $(this).data('id');
-
-        // Get Tags for Item
-        getTagsForItem(itemID).then((tags) => {
-            $('#tag-image').prop('src', $('#image-full-' + itemID).prop('href'));
-            tags.forEach((tag) => {
-                $('#tag-list').append("<span class='tag is-info'>" + tag.tag_name + "<button class='delete' data-id='" + tag.tag_id + "' aria-label='delete'></button></span> ");
-            });
-            $('#item-tags-content').removeClass('is-hidden');
-            $('#gallery-content').addClass('is-hidden');
-        });
-    });
-
     // Tag Back - Back to Gallery
     $('#back-to-gallery').on('click', function (event) {
-        event.preventDefault();
         // Clear Image Source
         $('#tag-image').prop('src', '');
         // Clear Tags
@@ -362,9 +423,47 @@ function GalleryBindings()
     });
 }
 
+function GalleryBindings() {
+    // Tag Links
+    $('.link-tags-page').on('click', function (event) {
+        let itemID = $(this).data('id');
+
+        // Get Tags for Item
+        getTagsForItem(itemID).then((tags) => {
+            $('#tag-image').prop('src', $('#item-full-' + itemID).prop('href'));
+            tags.forEach((tag) => {
+                $('#tag-list').append("<span class='tag is-info'>" + tag.tag_name + "<button class='delete' data-id='" + tag.tag_id + "' aria-label='delete'></button></span> ");
+            });
+            $('#item-tags-content').removeClass('is-hidden');
+            $('#gallery-content').addClass('is-hidden');
+        });
+    });
+}
+
+function PaginationBindings() {
+    // Pagination Links
+    $('.pagination-link').on('click', function (event) {
+        CURRENT_PAGE = $(this).data('page');
+        GalleryContent();
+    });
+
+    $('.pagination-next').on('click', function (event) {
+        if ($(this).hasClass('is-disabled') === false) {
+            CURRENT_PAGE = CURRENT_PAGE + 1;
+            GalleryContent();
+        }
+    });
+
+    $('.pagination-previous').on('click', function (event) {
+        if ($(this).hasClass('is-disabled') === false) {
+            CURRENT_PAGE = CURRENT_PAGE - 1;
+            GalleryContent();
+        }
+    });
+}
+
 // Set the Page Title
-function SetPageTitle()
-{
+function SetPageTitle() {
     let title = PAGE_TITLE
 
     if (PAGE_TYPE === PAGE_VIDEOS) {
@@ -377,12 +476,11 @@ function SetPageTitle()
 }
 
 // Set the Tag List for Search
-function setTagList(currentTags)
-{
+function setTagList(currentTags) {
     let tagLists = $('.datalist-for-tags');
 
     // Setup the Tag Lists
-    tagLists.each(function() {
+    tagLists.each(function () {
         // Empty the list
         $(this).empty();
 
@@ -392,12 +490,11 @@ function setTagList(currentTags)
         });
     });
 
-    
+
 }
 
 // Async - Page Title
-async function getPageTitle()
-{
+async function getPageTitle() {
     let result;
 
     try {
@@ -414,8 +511,7 @@ async function getPageTitle()
 }
 
 // Async - Tags
-async function getTags()
-{
+async function getTags() {
     let result;
 
     try {
@@ -433,8 +529,7 @@ async function getTags()
 }
 
 // Async - Total Images
-async function getTotalImages()
-{
+async function getTotalImages() {
     let result;
 
     try {
@@ -451,8 +546,7 @@ async function getTotalImages()
 }
 
 // Async - Total Videos
-async function getTotalVideos()
-{
+async function getTotalVideos() {
     let result;
 
     try {
@@ -469,8 +563,7 @@ async function getTotalVideos()
 }
 
 // Async - Total Image Pages
-async function getTotalImagePages()
-{
+async function getTotalImagePages() {
     let result;
 
     try {
@@ -487,8 +580,7 @@ async function getTotalImagePages()
 }
 
 // Async - Total Video Pages
-async function getTotalVideoPages()
-{
+async function getTotalVideoPages() {
     let result;
 
     try {
@@ -505,8 +597,7 @@ async function getTotalVideoPages()
 }
 
 // Async - Images for Page
-async function getImagesForPage(page)
-{
+async function getImagesForPage(page) {
     let result;
     let apiLink;
 
@@ -530,8 +621,7 @@ async function getImagesForPage(page)
 }
 
 // Async - Videos for Page
-async function getVideosForPage(page)
-{
+async function getVideosForPage(page) {
     let result;
     let apiLink;
 
@@ -555,8 +645,7 @@ async function getVideosForPage(page)
 }
 
 // Async - Tags for Image or Video
-async function getTagsForItem(itemID)
-{
+async function getTagsForItem(itemID) {
     let result;
     let apiLink = "/tag/for/";
 
@@ -578,5 +667,5 @@ async function getTagsForItem(itemID)
         return result;
     } catch (error) {
         console.error('Error fetching tags for item:', error);
-    } 
+    }
 }
