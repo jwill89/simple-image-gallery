@@ -144,11 +144,9 @@ foreach($images_in_folder as $file_name){
 
 // Loop Through Videos and GIFs
 foreach ($videos_in_folder as $file_name) {
-
-	
 	
 	// Ensure the Video Doesn't Exist
-	if (!file_exists(VideoCollection::VIDEO_DIRECTORY . $file_name)) {
+	if (!file_exists(VideoCollection::VIDEO_DIRECTORY_FULL . $file_name)) {
 		
 		// Create a new video
 		$video = new Video();
@@ -158,7 +156,7 @@ foreach ($videos_in_folder as $file_name) {
 		// Save the video
 		if ($video_collection->save($video) !== 0) {
 			// Move the File to the full directory.
-			rename(ImageCollection::IMAGE_DIRECTORY . $file_name, $image_dir_full . $file_name);
+			rename(VideoCollection::VIDEO_DIRECTORY . $file_name, $video_dir_full . $file_name);
 
 			// Increase the Videos Added Count
 			$videos_added++;
@@ -166,9 +164,6 @@ foreach ($videos_in_folder as $file_name) {
 			// Increase the Videos Not Added Count
 			$videos_not_added++;
 		}
-
-		// Move the File to the full directory. This will save time not re-scanning all images.
-		rename(VideoCollection::VIDEO_DIRECTORY . $file_name, $video_dir_full . $file_name);
 	
 	} else {
 		
