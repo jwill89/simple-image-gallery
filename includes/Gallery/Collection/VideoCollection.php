@@ -5,7 +5,6 @@ namespace Gallery\Collection;
 use Imagick;
 use ImagickException;
 use FFMpeg\FFMpeg;
-use FFMpeg\Coordinate\Dimension;
 use FFMpeg\Coordinate\TimeCode;
 use OutOfBoundsException;
 use Gallery\Storage\VideoStorage;
