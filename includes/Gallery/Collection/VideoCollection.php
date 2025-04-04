@@ -4,6 +4,9 @@ namespace Gallery\Collection;
 
 use Imagick;
 use ImagickException;
+use FFMpeg\FFMpeg;
+use FFMpeg\Coordinate\Dimension;
+use FFMpeg\Coordinate\TimeCode;
 use OutOfBoundsException;
 use Gallery\Storage\VideoStorage;
 use Gallery\Structure\Video;
@@ -89,49 +92,6 @@ class VideoCollection
     }
 
     /**
-     * @throws ImagickException
-     */
-    public function createThumbnail(Video $video_obj): void
-    {
-        // Max Width/Height of Thumbnail
-        $max_size = 200;
-
-        // Start New Thumbnail
-        $video = new Imagick(self::VIDEO_DIRECTORY . $video_obj->getFileName());
-
-        // If the video is wider
-        if ($video->getImageHeight() <= $video->getImageWidth()) {
-            // Resize video using the lanczos resampling algorithm based on width
-            $video->resizeImage($max_size, 0, Imagick::FILTER_LANCZOS, 1);
-
-            // If the video is taller
-        } else {
-            // Resize video using the lanczos resampling algorithm based on height
-            $video->resizeImage(0, $max_size, Imagick::FILTER_LANCZOS, 1);
-        }
-
-        // Set to use jpeg compression
-        $video->setImageCompression(Imagick::COMPRESSION_JPEG);
-
-        // Set compression level (1 lowest quality, 100 highest quality)
-        $video->setImageCompressionQuality(75);
-
-        // Strip out unneeded meta data
-        $video->stripImage();
-
-        // Start Thumbnail Write
-        $video_file_name = pathinfo($video->getImageFilename());
-
-        // Extension fis the same as the original
-        $ext = $video_file_name['extension'];
-
-        // Write Thumbnail
-        $video->writeImage(self::VIDEO_DIRECTORY_THUMBNAILS . $video_file_name['filename']. '.' . $ext);
-
-        $video->clear();
-    }
-
-    /**
      * Saves an video to the database and generates a thumbnail.
      *
      * @param Video $video
@@ -143,12 +103,130 @@ class VideoCollection
         $video_id = $this->storage->store($video);
 
         // If we have an ID, we can assume it was successful and generate a thumbnail
-        //if ($video_id > 0) {
-        //    // Create a thumbnail for the video
-        //    $this->createThumbnail($video);
-        //}
+        if ($video_id > 0) {
+
+            // Determine if we need to use Imagick or FFMpeg to make the Thumbnail
+            if (pathinfo($video->getFileName(), PATHINFO_EXTENSION) === 'gif') {
+                // Use Imagick to create a thumbnail for GIFs
+                $this->createGifThumbnail($video);
+            } else {
+                // Use FFMpeg to create a thumbnail for other video formats
+                $this->createThumbnail($video);
+            }
+        }
 
         return $video_id;
+    }
+
+    /**
+     * Creates a thumbnail for the video if nog in GIF format.
+     * It uses the PHP-FFMpeg library to generate a thumbnail image from the video.
+     *
+     * @param Video $video_obj
+     * @return void
+     */
+    public function createThumbnail(Video $video_obj): void
+    {
+        // Create a new FFMpeg instance
+        $ffmpeg = FFMpeg::create();
+
+        // Open the video file
+        $video = $ffmpeg->open(self::VIDEO_DIRECTORY . $video_obj->getFileName());
+
+        // Set the thumbnail path and filename
+        $thumbnail_path = self::VIDEO_DIRECTORY_THUMBNAILS . pathinfo($video_obj->getFileName(), PATHINFO_FILENAME) . '.jpg';
+
+        // Take a screenshot at 1 second into the video
+        $video->frame(TimeCode::fromSeconds(1))->save($thumbnail_path);
+
+        // Resize Thumbnail
+        if (file_exists($thumbnail_path)) {
+            $this->resizeThumbnail($thumbnail_path);
+        }
+        
+    }
+
+    /**
+     * Creates a thumbnail for GIFs using Imagick.
+     * 
+     * @throws ImagickException
+     */
+    public function createGifThumbnail(Video $video_obj): void
+    {
+        // Max Width/Height of Thumbnail
+        $max_size = 200;
+
+        // Start New Thumbnail
+        $image = new Imagick(self::VIDEO_DIRECTORY . $video_obj->getFileName());
+        $image->setImageDispose(Imagick::DISPOSE_NONE);
+        $image->setImageGravity(Imagick::GRAVITY_CENTER);
+        try {
+            $image->optimizeImageLayers();
+        } catch (ImagickException $e) {
+            // NDo Not Optimize
+        }
+        
+
+
+        // If the image is wider
+        if ($image->getImageHeight() <= $image->getImageWidth()) {
+            // Resize image using the lanczos resampling algorithm based on width
+            $image->resizeImage($max_size, 0, Imagick::FILTER_LANCZOS, 1);
+
+            // If the image is taller
+        } else {
+            // Resize image using the lanczos resampling algorithm based on height
+            $image->resizeImage(0, $max_size, Imagick::FILTER_LANCZOS, 1);
+        }
+
+        // Set to use jpeg compression
+        $image->setImageCompression(Imagick::COMPRESSION_JPEG);
+
+        // Set compression level (1 lowest quality, 100 highest quality)
+        $image->setImageCompressionQuality(75);
+
+        // Strip out unneeded meta data
+        $image->stripImage();
+
+        // Start Thumbnail Write
+        $image_file_name = pathinfo($image->getImageFilename());
+
+        // Write Thumbnail
+        $image->writeImage(self::VIDEO_DIRECTORY_THUMBNAILS . $image_file_name['filename']. '.' . 'jpg');
+
+        $image->clear();
+    }
+
+    /**
+     * Resizes a thumbnail if created via FFMpeg
+     *
+     * @param string $thumbnail_path
+     * @return void
+     */
+    public function resizeThumbnail(string $thumbnail_path): void
+    {
+        // Max Width/Height of Thumbnail
+        $max_size = 200;
+
+        // Create a new Imagick instance
+        $thumbnail = new Imagick($thumbnail_path);
+
+        // If the image is wider
+        if ($thumbnail->getImageHeight() <= $thumbnail->getImageWidth()) {
+            // Resize image using the lanczos resampling algorithm based on width
+            $thumbnail->resizeImage($max_size, 0, Imagick::FILTER_LANCZOS, 1);
+
+            // If the image is taller
+        } else {
+            // Resize image using the lanczos resampling algorithm based on height
+            $thumbnail->resizeImage(0, $max_size, Imagick::FILTER_LANCZOS, 1);
+        }
+
+        // Save the resized image
+        $thumbnail->writeImage($thumbnail_path);
+
+        // Clear the Imagick instance
+        $thumbnail->clear();
     }
 
     /**
