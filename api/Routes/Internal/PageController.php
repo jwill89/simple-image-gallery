@@ -5,6 +5,7 @@ namespace Routes\Internal;
 use Psr\Container\ContainerInterface;
 use Slim\Http\ServerRequest as Request;
 use Slim\Http\Response;
+use Gallery\Core\Configuration;
 use Gallery\Collection\ImageCollection;
 use Gallery\Collection\VideoCollection;
 
@@ -14,12 +15,15 @@ use Gallery\Collection\VideoCollection;
  */
 class PageController extends AbstractController
 {
-    private const string SITE_TITLE = 'Image Gallery';
-    private const int PER_PAGE = 40;
-
     // Collections
     private ImageCollection $image_collection;
     private VideoCollection $video_collection;
+
+    // Items Per Page
+    private int $items_per_page = 40;
+
+    // Gallery Title
+    private string $gallery_title = 'Gallery';
 
     /**
      * ImageController constructor
@@ -36,6 +40,10 @@ class PageController extends AbstractController
         // Set collections for use in class methods
         $this->image_collection = new ImageCollection();
         $this->video_collection = new VideoCollection();
+
+        // Set items from configuration
+        $this->items_per_page = Configuration::itemsPerPage();
+        $this->gallery_title = Configuration::galleryTitle();
     }
 
     /**
@@ -57,7 +65,7 @@ class PageController extends AbstractController
 
         // Get total images
         $total_images = $this->image_collection->totalImages();
-        $total_pages = (int)ceil($total_images / self::PER_PAGE);
+        $total_pages = (int)ceil($total_images / $this->items_per_page);
 
         // Set the return data
         $data = $total_pages;
@@ -85,7 +93,7 @@ class PageController extends AbstractController
 
         // Get total videos
         $total_videos = $this->video_collection->totalVideos();
-        $total_pages = (int)ceil($total_videos / self::PER_PAGE);
+        $total_pages = (int)ceil($total_videos / $this->items_per_page);
 
         // Set the return data
         $data = $total_pages;
@@ -112,7 +120,7 @@ class PageController extends AbstractController
         $data = [];
 
         // Get total images
-        $data = self::SITE_TITLE;
+        $data = $this->gallery_title;
 
         // Return data as json with HTTP status response
         return $response->withJson($data, $status);

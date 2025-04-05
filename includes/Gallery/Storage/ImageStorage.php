@@ -4,6 +4,7 @@ namespace Gallery\Storage;
 
 use PDO;
 use PDOException;
+use Gallery\Core\Configuration;
 use Gallery\Core\DatabaseConnection;
 use Gallery\Structure\Image;
 use Gallery\Structure\Tag;
@@ -17,13 +18,15 @@ class ImageStorage
     // Table Constants
     private const string MAIN_TABLE = 'images';
     private const string TAGS_TABLE = 'image_tags';
-    private const int PER_PAGE = 40;
 
     // Main Class Object Constant
     private const OBJ_CLASS = Image::class;
 
     // Database Connection
     private PDO $db;
+
+    // Items Per Page
+    private int $items_per_page = 40;
 
     /**
      * Class constructor
@@ -34,6 +37,9 @@ class ImageStorage
         if (!isset($this->db)) {
             $this->db = DatabaseConnection::getInstance();
         }
+
+        // Get Items Per Page from Configuration
+        $this->items_per_page = Configuration::itemsPerPage();
     }
 
     /**
@@ -170,7 +176,7 @@ class ImageStorage
         $images = [];
 
         // Calculate the offset for pagination
-        $offset = ($page_number - 1) * self::PER_PAGE;
+        $offset = ($page_number - 1) * $this->items_per_page;
 
         // Setup the Query
         $sql = "SELECT * FROM " . self::MAIN_TABLE . " ORDER BY image_id DESC LIMIT :limit OFFSET :offset";
@@ -181,7 +187,7 @@ class ImageStorage
         // If prepared successfully
         if ($stmt) {
             // Bind the limit and offset parameters
-            $stmt->bindValue(':limit', self::PER_PAGE, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $this->items_per_page, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
             // Try executing
