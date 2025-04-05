@@ -50,6 +50,61 @@ if (!$db_exists) {
 } else {
     echo <<<HTML
         <p class='db-success'>Database file exists and is writable.</p>
+        <h3>Creating Table 'configuration'</h3>
+    HTML;
+
+    // *****************************************************
+    // * Table Structure for primary table 'configuration' *
+    // *****************************************************
+
+    // Setup the SQL for the table creation
+    $sql = <<<SQL
+    CREATE TABLE IF NOT EXISTS "configuration" (
+        "gallery_title"	TEXT NOT NULL DEFAULT 'Gallery',
+        "items_per_page"	INTEGER NOT NULL DEFAULT 40
+    )
+    SQL;
+
+    // Execute SQL
+    $success = $db->exec($sql);
+
+    echo <<<HTML
+        <pre><code class="language-sql">$sql</code></pre>    
+    HTML;
+
+    if ($success !== false) {
+        echo "<p class='db-success'>Table 'configuration' created successfully.</p>";
+    } else {
+        echo "<p class='db-error'>Error creating table 'configuration'. SQLite Code: " . $db->errorInfo()[1] . ", " . $db->errorInfo()[0] . " - " . $db->errorInfo()[2] . "</p>";
+    }
+
+    echo <<<HTML
+        <h3>Inserting Default Data for 'configuration'</h3>
+    HTML;
+
+    // ************************************************
+    // * Table Data for primary table 'configuration' *
+    // ************************************************
+
+    // Setup the SQL for the table creation
+    $sql = <<<SQL
+    INSERT INTO "configuration" (gallery_title, items_per_page) VALUES ('Gallery', 40)
+    SQL;
+
+    // Execute SQL
+    $success = $db->exec($sql);
+
+    echo <<<HTML
+        <pre><code class="language-sql">$sql</code></pre>    
+    HTML;
+
+    if ($success !== false) {
+        echo "<p class='db-success'>Default data for table 'configuration' inserted successfully.</p>";
+    } else {
+        echo "<p class='db-error'>Error inserting default data for table 'configuration'. SQLite Code: " . $db->errorInfo()[1] . ", " . $db->errorInfo()[0] . " - " . $db->errorInfo()[2] . "</p>";
+    }
+
+    echo <<<HTML
         <h3>Creating Table 'images'</h3>
     HTML;
 
