@@ -24,16 +24,16 @@ class VideoCollection
     public const string VIDEO_DIRECTORY_THUMBNAILS = 'videos/thumbs/';
     
     // Video Database Storage Object
-    private VIdeoStorage $storage;
+    private VideoStorage $storage;
 
     /**
      * VideoCollection constructor.
-     * Initializes the VIdeoStorage object.
+     * Initializes the VideoStorage object.
      */
     public function __construct()
     {
         if (!isset($this->storage)) {
-            $this->storage = new VIdeoStorage();
+            $this->storage = new VideoStorage();
         }
     }
 
