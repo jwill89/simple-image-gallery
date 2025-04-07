@@ -10,39 +10,41 @@
 /**
  * @const {number} PAGE_IMAGES - Defines if the page is displaying images
  * @const {number} PAGE_VIDEOS - Defines if the page is displaying videos
+ * @const {number} PAGE_TAGS - Defines if the page is displaying tags
  * @const {string} API_BASE_URL - The API link for the gallery
  * @var {string} PAGE_TITLE - The title of the page
  * @var {Array} CURRENT_TAGS - The current tags for the page
- * @var {boolean} VIEW_ALL - If the page is viewing all images/videos
  * @var {number} CURRENT_PAGE - The current page number
  * @var {number} PAGE_TYPE - The type of page (images or videos)
  */
 const PAGE_IMAGES = 1;
 const PAGE_VIDEOS = 2;
+const PAGE_TAGS = 3;
 const API_BASE_URL = '/api';
 let PAGE_TITLE = 'Gallery';
 let CURRENT_TAGS = {};
-let VIEW_ALL = false;
 let CURRENT_PAGE = 1;
 let PAGE_TYPE = PAGE_IMAGES;
 
-/** Events fired at page load */
+/**
+ * @description This function is called when the page is loaded. It initializes the page by setting the title, loading tags, and setting the total images/videos in the footer.
+*/
 $(function () {
-    // Page Initialization
-    PageInit();
+    // Site Initialization
+    SiteInit();
 
     // Bind Element Events
-    NavigationBindings();
+    AddEventListenersNavigation();
 
     // Generate Default Content
-    GalleryContent();
+    RenderPageGallery();
 });
 
 /**
- * @function PageInit
- * @description Initializes the page by setting the title, loading tags, and setting the total images/videos in the footer.
+ * @function SiteInit
+ * @description Initializes the site by setting the title, loading tags, and setting the total images/videos in the footer.
  */
-function PageInit() {
+function SiteInit() {
     // Set gallery title
     getPageTitle().then((title) => {
         PAGE_TITLE = title;
@@ -52,7 +54,7 @@ function PageInit() {
     // Load all current tags
     getTags().then((tags) => {
         CURRENT_TAGS = tags;
-        setTagList(tags);
+        setTagList(CURRENT_TAGS);
     });
 
     // Set total images in footer
@@ -67,10 +69,10 @@ function PageInit() {
 }
 
 /**
- * @function GalleryContent
+ * @function RenderPageGallery
  * @description Generates the gallery content based on the current page and type (images or videos).
  */
-function GalleryContent() {
+function RenderPageGallery() {
     /**
      * @var {HTMLElement} gallerySection - The section of the page where the gallery content will be displayed
      * @var {HTMLElement} galleryDisplay - The div where the images/videos will be displayed
@@ -86,8 +88,7 @@ function GalleryContent() {
     // Determine if we are viewing images or videos and get the corresponding promise
     if (PAGE_TYPE === PAGE_IMAGES) {
         galleryPromise = getImagesForPage(CURRENT_PAGE);
-    }
-    else {
+    } else if (PAGE_TYPE === PAGE_VIDEOS) {
         galleryPromise = getVideosForPage(CURRENT_PAGE);
     }
 
@@ -117,7 +118,7 @@ function GalleryContent() {
                 item_id = item.image_id;
                 thumbnail_path = "images/thumbs/" + item.file_name;
                 full_path = "images/full/" + item.file_name;
-            } else {
+            } else if (PAGE_TYPE === PAGE_VIDEOS) {
                 item_id = item.video_id;
                 thumbnail_path = "videos/thumbs/" + item.file_name.split('.').slice(0, -1).join('.') + ".jpg";
                 full_path = "videos/full/" + item.file_name;
@@ -222,28 +223,25 @@ function GalleryContent() {
         gallerySection.removeClass('is-hidden');
 
         // Add Tag Bindings
-        GalleryBindings();
+        AddEventListenersGallery();
 
-        // Generate Pagination if not viewing all
-        if (VIEW_ALL === false) {
-            GalleryPagination();
-        }
-
+        // Generate Pagination
+        RenderGalleryPagination();
     });
 }
 
 /**
- * @function GalleryPagination
+ * @function RenderGalleryPagination
  * @description Generates the pagination for the gallery based on the current page and type (images or videos).
  */
-function GalleryPagination() {
+function RenderGalleryPagination() {
     const topDiv = $('#pagination-top');
     const bottomDiv = $('#pagination-bottom');
     let pagesPromise;
 
     if (PAGE_TYPE === PAGE_IMAGES) {
         pagesPromise = getTotalImagePages();
-    } else {
+    } else if (PAGE_TYPE === PAGE_VIDEOS) {
         pagesPromise = getTotalVideoPages();
     }
 
@@ -371,16 +369,16 @@ function GalleryPagination() {
         bottomDiv.empty().append(paginationBottom);
 
         // Bind Pagination Links
-        PaginationBindings();
+        AddEventListenersGalleryPagination();
     });
 }
 
 /**
- * @function TagContent
+ * @function RenderPageMediaTags
  * @description Generates the content for the tag page for an image or video.
  * @param {number} itemID 
  */
-function TagContent(itemID) {
+function RenderPageMediaTags(itemID) {
      // Get Tags for Item
      getTagsForItem(itemID).then((tags) => {
         const mediaContainer = $('#tags-page-media');
@@ -423,14 +421,33 @@ function TagContent(itemID) {
     });
 
     // Add Bindings for the Tag Page
-    TagBindings();
+    AddEventListenersMediaTags();
 }
 
 /**
- * @function NavigationBindings
+ * @function RenderPageTags
+ * @description Generates the content for the tags page.
+ * @todo Implement the RenderPageTags function
+ */
+function RenderPageTags() {
+    // TODO: Implement the RenderPageTags function
+}
+
+/**
+ * @function NavigationSetActive
+ * @description Sets the appropriate link as active in the navigation bar.
+ * @param {HTMLElement} activeLink 
+ */
+function NavigationSetActive(activeLink) {
+    $('a.navbar-item').removeClass('is-selected');
+    activeLink.addClass('is-selected');
+}
+
+/**
+ * @function AddEventListenersNavigation
  * @description Binds the navigation links to their respective functions.
  */
-function NavigationBindings() {
+function AddEventListenersNavigation() {
     // Navbar Mobile Burger Menu Toggle
     $('#nav_burger').on('click', function () {
         $('#nav_burger').toggleClass('is-active');
@@ -438,83 +455,71 @@ function NavigationBindings() {
     });
 
     // Main Links - Images
-    $('#view-images-link').on('click', function () {
-        if (PAGE_TYPE === PAGE_VIDEOS) {
+    $('#nav-images-link').on('click', function () {
+        if (PAGE_TYPE !== PAGE_IMAGES) {
             CURRENT_PAGE = 1;
         }
-        VIEW_ALL = false;
         PAGE_TYPE = PAGE_IMAGES;
-        GalleryContent();
-    });
-
-    $('#view-all-images-link').on('click', function () {
-        if (PAGE_TYPE === PAGE_VIDEOS) {
-            CURRENT_PAGE = 1;
-        }
-        VIEW_ALL = true;
-        PAGE_TYPE = PAGE_IMAGES;
-        GalleryContent();
+        NavigationSetActive($(this));
+        RenderPageGallery();
     });
 
     // Main Links - Videos
-    $('#view-videos-link').on('click', function () {
-        if (PAGE_TYPE === PAGE_IMAGES) {
+    $('#nav-videos-link').on('click', function () {
+        if (PAGE_TYPE !== PAGE_VIDEOS) {
             CURRENT_PAGE = 1;
         }
-        VIEW_ALL = false;
         PAGE_TYPE = PAGE_VIDEOS;
-        GalleryContent();
+        NavigationSetActive($(this));
+        RenderPageGallery();
     });
 
-    $('#view-all-videos-link').on('click', function () {
-        if (PAGE_TYPE === PAGE_IMAGES) {
-            CURRENT_PAGE = 1;
-        }
-        VIEW_ALL = true;
-        PAGE_TYPE = PAGE_VIDEOS;
-        GalleryContent();
+    // Main Links - Tags
+    $('#nav-tags-link').on('click', function () {
+        PAGE_TYPE = PAGE_TAGS;
+        RenderPageTags();
     });
 }
 
 /**
- * @function GalleryBindings
+ * @function AddEventListenersGallery
  * @description Binds the gallery links to their respective functions.
  */
-function GalleryBindings() {
+function AddEventListenersGallery() {
     // Tag Links
     $('.link-tags-page').on('click', function () {
         const itemID = $(this).data('id');
-        TagContent(itemID);       
+        RenderPageMediaTags(itemID);       
     });
 }
 
-function PaginationBindings() {
+function AddEventListenersGalleryPagination() {
     // Pagination Links
     $('.pagination-link').on('click', function () {
         CURRENT_PAGE = $(this).data('page');
-        GalleryContent();
+        RenderPageGallery();
     });
 
     $('.pagination-next').on('click', function () {
         if ($(this).hasClass('is-disabled') === false) {
             CURRENT_PAGE = CURRENT_PAGE + 1;
-            GalleryContent();
+            RenderPageGallery();
         }
     });
 
     $('.pagination-previous').on('click', function () {
         if ($(this).hasClass('is-disabled') === false) {
             CURRENT_PAGE = CURRENT_PAGE - 1;
-            GalleryContent();
+            RenderPageGallery();
         }
     });
 }
 
 /**
- * @function TagBindings
+ * @function AddEventListenersMediaTags
  * @description Binds the tag links to their respective functions.
  */
-function TagBindings() {
+function AddEventListenersMediaTags() {
     // Tag Back - Back to Gallery
     $('#back-to-gallery').on('click', function () {
         // Clear Image Source
@@ -568,7 +573,13 @@ function setTagList(currentTags) {
     });
 }
 
-// Async - Page Title
+/**
+ * @function getPageTitle
+ * @description Fetches the page title from the API.
+ * @async
+ * @throws {Error} If there is an error fetching the page title.
+ * @returns {Promise} A promise that resolves to the page title.
+ */
 async function getPageTitle() {
     const apiLink = `${API_BASE_URL}/pages/title/`;
 
@@ -583,7 +594,13 @@ async function getPageTitle() {
     }
 }
 
-// Async - Tags
+/**
+ * @function getTags
+ * @description Fetches the tags from the API.
+ * @async
+ * @throws {Error} If there is an error fetching the tags.
+ * @returns {Promise} A promise that resolves to the tags.
+ */
 async function getTags() {
     const apiLink = `${API_BASE_URL}/tag/`;
 
@@ -597,7 +614,13 @@ async function getTags() {
     }
 }
 
-// Async - Total Images
+/**
+ * @function getTotalImages
+ * @description Fetches the total number of images from the API.
+ * @async
+ * @throws {Error} If there is an error fetching the total number of images.
+ * @returns {Promise} A promise that resolves to the total number of images.
+ */
 async function getTotalImages() {
     const apiLink = `${API_BASE_URL}/images/total/`;
 
@@ -611,7 +634,13 @@ async function getTotalImages() {
     }
 }
 
-// Async - Total Videos
+/**
+ * @function getTotalVideos
+ * @description Fetches the total number of videos from the API.
+ * @async
+ * @throws {Error} If there is an error fetching the total number of videos.
+ * @returns {Promise} A promise that resolves to the total number of videos.
+ */
 async function getTotalVideos() {
     const apiLink = `${API_BASE_URL}/videos/total/`;
 
@@ -625,7 +654,13 @@ async function getTotalVideos() {
     }
 }
 
-// Async - Total Image Pages
+/**
+ * @function getTotalImagePages
+ * @description Fetches the total number of image pages from the API.
+ * @async
+ * @throws {Error} If there is an error fetching the total number of image pages.
+ * @returns {Promise} A promise that resolves to the total number of image pages.
+ */
 async function getTotalImagePages() {
     const apiLink = `${API_BASE_URL}/pages/images/`;
 
@@ -639,7 +674,13 @@ async function getTotalImagePages() {
     }
 }
 
-// Async - Total Video Pages
+/**
+ * @function getTotalVideoPages
+ * @description Fetches the total number of video pages from the API.
+ * @async
+ * @throws {Error} If there is an error fetching the total number of video pages.
+ * @returns {Promise} A promise that resolves to the total number of video pages.
+ */
 async function getTotalVideoPages() {
     const apiLink = `${API_BASE_URL}/pages/videos/`;
 
@@ -653,15 +694,16 @@ async function getTotalVideoPages() {
     }
 }
 
-// Async - Images for Page
+/**
+ * @function getImagesForPage
+ * @description Fetches the images for a specific page from the API.
+ * @async
+ * @param {number} page The page number to fetch images for.
+ * @throws {Error} If there is an error fetching the images for the page.
+ * @returns {Promise} A promise that resolves to the images for the page.
+ */
 async function getImagesForPage(page) {
-    let apiLink;
-
-    if (VIEW_ALL === false) {
-        apiLink = `${API_BASE_URL}/images/page/${page}/`;
-    } else {
-        apiLink = `${API_BASE_URL}/images/`;
-    }
+    const apiLink = `${API_BASE_URL}/images/page/${page}/`;
 
     try {
         const response = await fetch(apiLink)
@@ -673,16 +715,16 @@ async function getImagesForPage(page) {
     }
 }
 
-// Async - Videos for Page
+/**
+ * @function getVideosForPage
+ * @description Fetches the videos for a specific page from the API.
+ * @async
+ * @param {number} page The page number to fetch videos for.
+ * @throws {Error} If there is an error fetching the videos for the page.
+ * @returns {Promise} A promise that resolves to the videos for the page.
+ */
 async function getVideosForPage(page) {
-    let apiLink;
-
-    if (VIEW_ALL === false) {
-        apiLink = `${API_BASE_URL}/videos/page/${page}/`;
-    }
-    else {
-        apiLink = `${API_BASE_URL}/videos/`;
-    }
+    const apiLink = `${API_BASE_URL}/videos/page/${page}/`;
 
     try {
         const response = await fetch(apiLink)
@@ -694,13 +736,20 @@ async function getVideosForPage(page) {
     }
 }
 
-// Async - Tags for Image or Video
+/**
+ * @function getTagsForItem
+ * @description Fetches the tags for a specific image or video from the API.
+ * @async
+ * @param {number} itemID The ID of the image or video to fetch tags for.
+ * @throws {Error} If there is an error fetching the tags for the item.
+ * @returns {Promise} A promise that resolves to the tags for the item.
+ */
 async function getTagsForItem(itemID) {
     let apiLink;
 
     if (PAGE_TYPE === PAGE_IMAGES) {
         apiLink = `${API_BASE_URL}/tag/for/image/${itemID}/`;
-    } else {
+    } else if (PAGE_TYPE === PAGE_VIDEOS) {
         apiLink = `${API_BASE_URL}/tag/for/video/${itemID}/`;
     }
 
