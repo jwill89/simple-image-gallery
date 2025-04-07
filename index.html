@@ -33,32 +33,40 @@
             </a>
         </div>
 
-        <!-- Dropdown Menus-->
+        <!-- Menu Links -->
         <div id="navMenu" class="navbar-menu">
             <div class="navbar-start">
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Images</a>
-                    <div class="navbar-dropdown">
-                        <a class="navbar-item" id="view-images-link">View Pages</a>
-                        <a class="navbar-item" id="view-all-images-link">View All</a>
-                        <a class="navbar-item" id="tags-link">View Tags</a>
-                    </div>
-                </div>
-
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">Videos</a>
-                    <div class="navbar-dropdown">
-                        <a class="navbar-item" id="view-videos-link">View Pages</a>
-                        <a class="navbar-item" id="view-all-videos-link">View All</a>
-                    </div>
-                </div>
+                <a class="navbar-item" id="nav-home-link">Home</a>
+                <a class="navbar-item" id="nav-images-link">Images</a>
+                <a class="navbar-item" id="nav-videos-link">Videos</a>
+                <a class="navbar-item" id="nav-tags-link">Tags</a>
             </div>
 
             <div class="navbar-end">
                 <div class="navbar-item">
+                    <!-- Items Per-Page Input -->
+                    <div class="field">
+                        <div class="control has-icons-left">
+                            <div class="select">
+                                <select name="items_per_page" id="items_per_page" title="Items Per-Page">
+                                  <option>Items Per-Page</option>
+                                  <option value="15">15</option>
+                                  <option value="30">30</option>
+                                  <option value="40">40</option>
+                                  <option value="60">60</option>
+                                  <option value="100">100</option>
+                                </select>
+                              </div>
+                              <div class="icon is-left">
+                                <i class="fa-solid fa-table"></i>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="navbar-item">
                     <!-- Tag Search Input -->
                     <div class="field has-addons">
-                        <p class="control has-icons-left">
+                        <div class="control has-icons-left">
                             <input class="input" title="Tag List" type="text" name="search_term"
                                 placeholder="Search for tags, separate with a comma" list="search-list-tags" />
                             <datalist class="datalist-for-tags" id="search-list-tags">
@@ -66,10 +74,10 @@
                             <span class="icon is-left">
                                 <i class="fa-solid fa-tags"></i>
                             </span>
-                        </p>
-                        <p class="control">
+                        </div>
+                        <div class="control">
                             <button class="button" id="search-button">Search</button>
-                        </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -82,6 +90,7 @@
         <div class="container">
             <!-- Pagination - Top -->
             <div id="pagination-top"></div>
+            <hr/>
 
             <div class="columns is-flex-direction-column" style="min-height: 75vh">
                 <div class="column" id="gallery-display">
@@ -89,6 +98,7 @@
             </div>
 
             <!-- Pagination - Bottom -->
+            <hr/>
             <div id="pagination-bottom"></div>
         </div>
     </section>
@@ -134,14 +144,27 @@
     <footer class="footer is-flex-align-items-flex-end mt-auto">
         <div class="content has-text-centered">
             <p>
-            Programmed by <a href="https://www.mathdad.me" target="_blank">MathDad</a>. Utilizes
-            the <a href="https://bulma.io/" target="_blank">Bulma</a> CSS Framework.<br />
-            Repository on <a href="https://github.com/jwill89/simple-image-gallery/">GitHub</a>.
-            The source code is licensed under the 
-            <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a> license.<br />
-            All images are &copy; Copyright their respective creators.<br />
-            All characters in images are &copy; Copyright their respective owners.<br/>
-            <strong>Total Images:</strong> <span id="total-images"></span> <strong>|</strong> <strong>Total Videos:</strong> <span id="total-videos"></span>
+                Programmed by <a href="https://www.mathdad.me" target="_blank">MathDad</a>. Utilizes
+                the <a href="https://bulma.io/" target="_blank">Bulma</a> CSS Framework.<br />
+                Repository on <a href="https://github.com/jwill89/simple-image-gallery/">GitHub</a>.
+                The source code is licensed under the 
+                <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a> license.<br />
+                All images &copy; their respective creators.<br />
+                All characters in images &copy; their respective owners.
+                <div class="level">
+                    <div class="level-item has-text-centered">
+                        <div>
+                            <p class="heading mb-0">Images</p>
+                            <h3 class="m-0" id="total-images"></h3>
+                        </div>
+                    </div>
+                    <div class="level-item has-text-centered">
+                        <div>
+                            <p class="heading mb-0">Videos</p>
+                            <h3 class="m-0" id="total-videos"></h3>
+                        </div>
+                    </div>
+                </div>
             </p>
         </div>
     </footer>
