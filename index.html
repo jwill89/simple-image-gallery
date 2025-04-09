@@ -15,6 +15,7 @@
     <script type="text/javascript" src="js/lightbox.min.js"></script>
     <script type="text/javascript" src="js/gallery.js"></script>
     <!-- FontAwesome Kit -->
+
 </head>
 
 <body class="sticky-footer has-navbar-fixed-top">
@@ -36,25 +37,27 @@
         <!-- Menu Links -->
         <div id="navMenu" class="navbar-menu">
             <div class="navbar-start">
-                <a class="navbar-item" id="nav-home-link">Home</a>
-                <a class="navbar-item" id="nav-images-link">Images</a>
+                <a class="navbar-item is-selected" id="nav-images-link">Images</a>
                 <a class="navbar-item" id="nav-videos-link">Videos</a>
                 <a class="navbar-item" id="nav-tags-link">Tags</a>
             </div>
 
             <div class="navbar-end">
                 <div class="navbar-item">
+                    <!-- Blur Thumbnails Button -->
+                    <button class="button" id="blur-thumbs">Blur: Off</button>
+                </div>
+                <div class="navbar-item">
                     <!-- Items Per-Page Input -->
                     <div class="field">
                         <div class="control has-icons-left">
                             <div class="select">
-                                <select name="items_per_page" id="items_per_page" title="Items Per-Page">
-                                  <option>Items Per-Page</option>
-                                  <option value="15">15</option>
-                                  <option value="30">30</option>
-                                  <option value="40">40</option>
-                                  <option value="60">60</option>
-                                  <option value="100">100</option>
+                                <select name="items-per-page" id="items-per-page" title="Items Per-Page">
+                                  <option value="15">15 Items Per-Page</option>
+                                  <option value="30">30 Items Per-Page</option>
+                                  <option value="40" selected>40 Items Per-Page</option>
+                                  <option value="60">60 Items Per-Page</option>
+                                  <option value="100">100 Items Per-Page</option>
                                 </select>
                               </div>
                               <div class="icon is-left">
@@ -67,7 +70,7 @@
                     <!-- Tag Search Input -->
                     <div class="field has-addons">
                         <div class="control has-icons-left">
-                            <input class="input" title="Tag List" type="text" name="search_term"
+                            <input class="input" title="Tag List" type="text" name="nav_search_tags" id="nav_search_tags"
                                 placeholder="Search for tags, separate with a comma" list="search-list-tags" />
                             <datalist class="datalist-for-tags" id="search-list-tags">
                             </datalist>
@@ -76,7 +79,10 @@
                             </span>
                         </div>
                         <div class="control">
-                            <button class="button" id="search-button">Search</button>
+                            <button class="button" id="search-tags">Search</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-hidden" id="reset-tags">Reset</button>
                         </div>
                     </div>
                 </div>
@@ -109,7 +115,7 @@
         <div class="container">
             <div class="columns">
                 <div class="column is-three-fifths">
-                    <figure class="image tags-page-img" id="tags-page-media">
+                    <figure class="image tags-page-img gallery-image" id="tags-page-media">
                     </figure>
                 </div>
                 <div class="column" id="tag-data">
@@ -122,13 +128,18 @@
                         </button>
                         <h2>Add More Tags</h2>
                         <label class="label">Tags</label>
-                        <div class="control has-icons-left">
-                            <input class="input" type="text" name="add_tag" id="add_tag" placeholder="" value="" list="add-list-tags" />
-                            <span class="icon is-left">
-                                <i class="fa-solid fa-tags"></i>
-                            </span>
-                            <datalist class="datalist-for-tags" id="add-list-tags">
-                            </datalist>
+                        <div class="field has-addons">
+                            <div class="control is-expanded has-icons-left">
+                                <input class="input" type="text" name="add_tag" id="add_tag" placeholder="" value="" list="add-list-tags" />
+                                <span class="icon is-left">
+                                    <i class="fa-solid fa-tags"></i>
+                                </span>
+                                <datalist class="datalist-for-tags" id="add-list-tags">
+                                </datalist>
+                            </div>
+                            <div class="control">
+                                <button class="button is-primary" id="add-tags">Add Tags</button>
+                            </div>
                         </div>
                         <p class="help">Add tags. Multiple tag should be separate by a comma. If a tag does not exist, it will be created.</p>
                     </div>
