@@ -5,6 +5,7 @@ namespace Routes\Internal;
 use Psr\Container\ContainerInterface;
 use Slim\Http\ServerRequest as Request;
 use Slim\Http\Response;
+use Gallery\Core\Configuration;
 use Gallery\Collection\ImageCollection;
 use Gallery\Collection\TagCollection;
 
@@ -83,8 +84,9 @@ class ImageController extends AbstractController
      */
     public function getImagesForPage(Request $request, Response $response, array $args): Response
     {
-        // Initialize Page if provided
+        // Initialize variables if provided
         $page = (int)$this->parseParameters($args, 'page', 0);
+        $items_per_page = (int)$this->parseParameters($args, 'items_per_page', Configuration::DEFAULT_PER_PAGE);
 
         // Assume status OK
         $status = 200;
@@ -99,7 +101,7 @@ class ImageController extends AbstractController
         // If valid page provided, get images for that page
         } elseif ($page > 0) {
             // Get images and encode
-            $data = $this->image_collection->getForPage($page);
+            $data = $this->image_collection->getForPage($page, $items_per_page);
         }
 
         // Return data as json with HTTP status response
@@ -118,8 +120,9 @@ class ImageController extends AbstractController
     public function getImagesWithTags(Request $request, Response $response, array $args): Response
     {
         // Initialize Required Variables
-        $params = $request->getParsedBody();
-        $tag_list = explode(',', str_replace(' ', '', $this->parseParameters($params, 'tag_list', '')));
+        $tag_list = array_map('trim', explode(',', $this->parseParameters($args, 'tag_list', '')));
+        $page = (int)$this->parseParameters($args, 'page', 1);
+        $items_per_page = (int)$this->parseParameters($args, 'items_per_page', Configuration::DEFAULT_PER_PAGE);
 
         // Assume status OK
         $status = 200;
@@ -139,10 +142,10 @@ class ImageController extends AbstractController
 
         // Get the images with the tags
         if (empty($tag_ids)) {
-            $data = ['error' => 'NoValidTagsSupplied'];
+            $data = ['error' => "NoValidTagsSupplied"];
             $status = 404;
         } else {
-            $data = $this->image_collection->getWithTags($tag_ids);
+            $data = $this->image_collection->getWithTags($tag_ids, $page, $items_per_page);
         }
 
         // Return data as json with HTTP status response

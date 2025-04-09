@@ -5,6 +5,7 @@ namespace Routes\Internal;
 use Psr\Container\ContainerInterface;
 use Slim\Http\ServerRequest as Request;
 use Slim\Http\Response;
+use Gallery\Core\Configuration;
 use Gallery\Collection\VideoCollection;
 use Gallery\Collection\TagCollection;
 
@@ -85,6 +86,7 @@ class VideoController extends AbstractController
     {
         // Initialize Page if provided
         $page = (int)$this->parseParameters($args, 'page', 0);
+        $items_per_page = (int)$this->parseParameters($args, 'items_per_page', Configuration::DEFAULT_PER_PAGE);
 
         // Assume status OK
         $status = 200;
@@ -99,7 +101,7 @@ class VideoController extends AbstractController
         // If valid page provided, get videos for that page
         } elseif ($page > 0) {
             // Get videos and encode
-            $data = $this->video_collection->getForPage($page);
+            $data = $this->video_collection->getForPage($page, $items_per_page);
         }
 
         // Return data as json with HTTP status response
@@ -118,8 +120,8 @@ class VideoController extends AbstractController
     public function getVideosWithTags(Request $request, Response $response, array $args): Response
     {
        // Initialize Required Variables
-       $params = $request->getParsedBody();
-       $tag_list = explode(',', str_replace(' ', '', $this->parseParameters($params, 'tag_list', '')));
+       $tag_list = explode(',', str_replace(' ', '', $this->parseParameters($args, 'tag_list', '')));
+       $items_per_page = (int)$this->parseParameters($args, 'items_per_page', Configuration::DEFAULT_PER_PAGE);
 
        // Assume status OK
        $status = 200;

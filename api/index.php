@@ -10,6 +10,7 @@ use Routes\Internal\ImageController;
 use Routes\Internal\VideoController;
 use Routes\Internal\TagController;
 use Routes\Internal\PageController;
+use Routes\Internal\ConfigurationController;
 
 // Create Container using PHP-DI
 $container = new Container();
@@ -36,42 +37,50 @@ $app->add(function($request, $handler) {
     return $response
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, PATCH')
         ->withHeader('X-Frame-Options', 'SAMEORIGIN');
 });
 
 // Image Controllers
 $app->group('/images', function (RouteCollectorProxy $group) {
-    $group->get('/page/{page}[/]', ImageController::class . ':getImagesForPage');
-    $group->get('/with-tags[/]', ImageController::class . ':getImagesWithTags');
+    $group->get('/page/{page}[/[{items_per_page}[/]]]', ImageController::class . ':getImagesForPage');
+    $group->get('/with-tags/{tag_list}/{page}[/[{items_per_page}[/]]]', ImageController::class . ':getImagesWithTags');
     $group->get('/total[/]', ImageController::class . ':getTotalImages');
     $group->get('/[{image_id}[/]]', ImageController::class . ':getImage');
 });
 
 // Video Controllers
 $app->group('/videos', function (RouteCollectorProxy $group) {
-    $group->get('/page/{page}[/]', VideoController::class . ':getVideosForPage');
-    $group->get('/with-tags[/]', VideoController::class . ':getVideosWithTags');
+    $group->get('/page/{page}[/[{items_per_page}[/]]]', VideoController::class . ':getVideosForPage');
+    $group->get('/with-tags/{tag_list}/{page}[/[{items_per_page}[/]]]', VideoController::class . ':getVideosWithTags');
     $group->get('/total[/]', VideoController::class . ':getTotalVideos');
     $group->get('/[{video_id}[/]]', VideoController::class . ':getVideo');
 });
 
 // Tag Controllers
-$app->group('/tag', function (RouteCollectorProxy $group) {
-    $group->get('/[{tag_id}[/]]', TagController::class . ':getTag');
+$app->group('/tags', function (RouteCollectorProxy $group) {
+    $group->get('/all[/]', TagController::class . ':getAllTags');
+    $group->get('/display[/]', TagController::class . ':getTagListForDisplay');
+    $group->get('/tag/{tag_id}[/]', TagController::class . ':getTag');
     $group->get('/for/image/{image_id}[/]', TagController::class . ':getTagsForImage');
     $group->get('/for/video/{video_id}[/]', TagController::class . ':getTagsForVideo');
-    $group->put('/image/add[/]', TagController::class . ':addTagToImage');
-    $group->put('/image/remove[/]', TagController::class . ':removeTagFromImage');
-    $group->put('/video/add[/]', TagController::class . ':addTagToVideo');
-    $group->put('/video/remove[/]', TagController::class . ':removeTagFromVideo');
+    $group->patch('/image/add[/]', TagController::class . ':addTagsToImage');
+    $group->patch('/image/remove[/]', TagController::class . ':removeTagFromImage');
+    $group->patch('/video/add[/]', TagController::class . ':addTagsToVideo');
+    $group->patch('/video/remove[/]', TagController::class . ':removeTagFromVideo');
 });
 
 // Page Controllers
 $app->group('/pages', function (RouteCollectorProxy $group) {
-    $group->get('/images[/]', PageController::class . ':getTotalImagePages');
-    $group->get('/videos[/]', PageController::class . ':getTotalVideoPages');
-    $group->get('/title[/]', PageController::class . ':getGalleryTitle');
+    $group->get('/images[/[{items_per_page}[/]]]', PageController::class . ':getTotalImagePages');
+    $group->get('/images/with-tags/{tag_list}[/[{items_per_page}[/]]]', PageController::class . ':getTotalImagePagesWithTags');
+    $group->get('/videos[/[{items_per_page}[/]]]', PageController::class . ':getTotalVideoPages');
+    $group->get('/videos/with-tags/{tag_list}[/[{items_per_page}[/]]]', PageController::class . ':getTotalVideoPagesWithTags');
+});
+
+// Configuration Controllers
+$app->group('/config', function (RouteCollectorProxy $group) {
+    $group->get('/title[/]', ConfigurationController::class . ':getGalleryTitle');
 });
 
 // Run the app

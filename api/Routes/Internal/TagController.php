@@ -63,14 +63,64 @@ class TagController extends AbstractController
         // If invalid ID provided, return error
         if (!empty($tag_id) && (!is_numeric($tag_id) || $tag_id <= 0)) {
             $data = ['error' => 'InvalidTagID'];
+            $status = 404;
+        // If no tag ID provided, get all tags
+        } elseif ($tag_id === null) {
+            $data = ['error' => 'NoTagIDProvided'];
             $status = 400;
         // If tag ID provided, get the tag
         } elseif (!empty($tag_id) && $tag_id > 0) {
             $data = $this->tag_collection->get($tag_id);
-        // If no tag ID provided, get all tags
-        } elseif ($tag_id === null) {
-            $data = $this->tag_collection->getAll();
         }
+
+        // Return data as json with HTTP status response
+        return $response->withJson($data, $status);
+    }
+
+    /**
+     * getAllTags function
+     * This function is used to get all tags
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function getAllTags(Request $request, Response $response, array $args): Response
+    {
+        // Assume status OK
+        $status = 200;
+
+        // Default Data
+        $data = [];
+
+        // Get all tags
+        $data = $this->tag_collection->getAll();
+
+        // Return data as json with HTTP status response
+        return $response->withJson($data, $status);
+    }
+
+    /**
+     * getTagListForDisplay function
+     * This function is used to get all tags, sorted alphabetically and put into a
+     * json response to display on the tag listing page.
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function getTagListForDisplay(Request $request, Response $response, array $args): Response
+    {
+        // Assume status OK
+        $status = 200;
+
+        // Default Data
+        $data = [];
+
+        // Get all tags
+        $data = $this->tag_collection->getAll();
 
         // Return data as json with HTTP status response
         return $response->withJson($data, $status);
@@ -158,12 +208,12 @@ class TagController extends AbstractController
      * @param array $args
      * @return Response
      */
-    public function addTagToImage(Request $request, Response $response, array $args): Response
+    public function addTagsToImage(Request $request, Response $response, array $args): Response
     {
         // Initialize Required Variables
         $params = $request->getParsedBody();
-        $image_id = (int)$this->parseParameters($params, 'image_id', 0);
-        $tag_name = $this->parseParameters($params, 'tag_name', '');
+        $image_id = (int)$this->parseParameters($params, 'item_id', 0);
+        $tag_list = array_unique(array_map('trim', explode(',', $this->parseParameters($params, 'tag_list', ''))));
 
         // Assume OK status
         $status = 200;
@@ -184,30 +234,35 @@ class TagController extends AbstractController
                 $data = ['error' => 'ImageDoesNotExist'];
                 $status = 404;
             } else {
-                // Check for valid tag name
-                if ($tag_name === '') {
-                    $data = ['error' => 'InvalidTagName'];
+                // Check for tag list
+                if (empty($tag_list)) {
+                    $data = ['error' => 'InvalidTagList'];
                     $status = 404;
                 } else {
-                    // Get/Create the tag
-                    $tag = $this->tag_collection->getOrCreate($tag_name);
+                    // Loop through tags and get/create them
+                    foreach ($tag_list as $tag_name) {
+                        // Check for non-empty tag name and skip if empty
+                        if (empty($tag_name)) {
+                            continue;
+                        }
 
-                    // Check for valid tag.
-                    if (!($tag instanceof Tag)) {
-                        $data = ['error' => 'CouldNotFindOrCreateTag'];
+                        // Get or Create Tag
+                        $tag = $this->tag_collection->getOrCreate($tag_name);
+
+                        // Store tag ID for collection use
+                        $tag_ids[] = $tag->getTagId();
+                    }
+
+                    // Add the tags to the image tags
+                    $tags_added = $this->tag_collection->addTagsToImage($image, $tag_ids);
+
+                    // If tag not added, set error
+                    if (!$tags_added) {
+                        $data = ['error' => 'CouldNotAddAllTagsToImage'];
                         $status = 404;
                     } else {
-                        // Add the tag to the image tags
-                        $tag_added = $this->tag_collection->addTagToImage($image, $tag);
-
-                        // If tag not added, set error
-                        if (!$tag_added) {
-                            $data = ['error' => 'CouldNotAddTagToImage'];
-                            $status = 404;
-                        } else {
-                            // Get the tags for the image now that we updated them
-                            $data = $this->tag_collection->getTagsForImage($image);
-                        }
+                        // Get the tags for the image now that we updated them
+                        $data = $this->tag_collection->getTagsForImage($image);
                     }
                 }
             }
@@ -226,12 +281,12 @@ class TagController extends AbstractController
      * @param array $args
      * @return Response
      */
-    public function addTagToVideo(Request $request, Response $response, array $args): Response
+    public function addTagsToVideo(Request $request, Response $response, array $args): Response
     {
         // Initialize Required Variables
         $params = $request->getParsedBody();
-        $video_id = (int)$this->parseParameters($params, 'video_id', 0);
-        $tag_name = $this->parseParameters($params, 'tag_name', '');
+        $video_id = (int)$this->parseParameters($params, 'item_id', 0);
+        $tag_list = array_unique(array_map('trim', explode(',', $this->parseParameters($params, 'tag_list', ''))));
 
         // Assume OK status
         $status = 200;
@@ -252,30 +307,35 @@ class TagController extends AbstractController
                 $data = ['error' => 'VideoDoesNotExist'];
                 $status = 404;
             } else {
-                // Check for valid tag name
-                if ($tag_name === '') {
-                    $data = ['error' => 'InvalidTagName'];
+                // Check for tag list
+                if (empty($tag_list)) {
+                    $data = ['error' => 'InvalidTagList'];
                     $status = 404;
                 } else {
-                    // Get/Create the tag
-                    $tag = $this->tag_collection->getOrCreate($tag_name);
+                    // Loop through tags and get/create them
+                    foreach ($tag_list as $tag_name) {
+                        // Check for non-empty tag name and skip if empty
+                        if (empty($tag_name)) {
+                            continue;
+                        }
 
-                    // Check for valid tag.
-                    if (!($tag instanceof Tag)) {
-                        $data = ['error' => 'CouldNotFindOrCreateTag'];
+                        // Get or Create Tag
+                        $tag = $this->tag_collection->getOrCreate($tag_name);
+
+                        // Store tag ID for collection use
+                        $tag_ids[] = $tag->getTagId();
+                    }
+
+                    // Add the tags to the image tags
+                    $tags_added = $this->tag_collection->addTagsToVideo($video, $tag_ids);
+
+                    // If tag not added, set error
+                    if (!$tags_added) {
+                        $data = ['error' => 'CouldNotAddAllTagsToVideo'];
                         $status = 404;
                     } else {
-                        // Add the tag to the video tags
-                        $tag_added = $this->tag_collection->addTagToVideo($video, $tag);
-
-                        // If tag not added, set error
-                        if (!$tag_added) {
-                            $data = ['error' => 'CouldNotAddTagToVideo'];
-                            $status = 404;
-                        } else {
-                            // Get the tags for the video now that we updated them
-                            $data = $this->tag_collection->getTagsForVideo($video);
-                        }
+                        // Get the tags for the image now that we updated them
+                        $data = $this->tag_collection->getTagsForVideo($video);
                     }
                 }
             }
