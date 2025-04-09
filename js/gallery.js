@@ -2,7 +2,7 @@
  * @file gallery.js
  * @author MathDad <https://www.mathdad.me>
  * @license MIT
- * @version 1.0.1
+ * @version 1.0.2
  * @description This file contains the JavaScript code for the site. It handles the loading of images and videos, pagination, and tag management.
  */
 
@@ -13,7 +13,8 @@
  * @const {number} PAGE_TAGS - Defines if the page is displaying tags
  * @const {string} API_BASE_URL - The API link for the gallery
  * @var {string} PAGE_TITLE - The title of the page
- * @var {Array} CURRENT_TAGS - The current tags for the page
+ * @var {Array} CURRENT_TAGS - The current searched tags
+ * @var {Array} ALL_TAGS - The list of all tags
  * @var {number} CURRENT_PAGE - The current page number
  * @var {number} PAGE_TYPE - The type of page (images or videos)
  */
@@ -22,9 +23,12 @@ const PAGE_VIDEOS = 2;
 const PAGE_TAGS = 3;
 const API_BASE_URL = '/api';
 let PAGE_TITLE = 'Gallery';
-let CURRENT_TAGS = {};
-let CURRENT_PAGE = 1;
+let CURRENT_TAGS = [];
+let ALL_TAGS = [];
+let CURRENT_PAGE = PAGE_IMAGES;
 let PAGE_TYPE = PAGE_IMAGES;
+let ITEMS_PER_PAGE = 40;
+let BLUR_THUMBNAILS = false;
 
 /**
  * @description This function is called when the page is loaded. It initializes the page by setting the title, loading tags, and setting the total images/videos in the footer.
@@ -35,6 +39,9 @@ $(function () {
 
     // Bind Element Events
     AddEventListenersNavigation();
+
+    // Add Bindings for the Tag Page (Permanent Hidden Items, Prevent Looping)
+    AddEventListenersMediaTags();
 
     // Generate Default Content
     RenderPageGallery();
@@ -48,13 +55,13 @@ function SiteInit() {
     // Set gallery title
     getPageTitle().then((title) => {
         PAGE_TITLE = title;
-        SetPageTitle();
+        setPageTitle();
     });
 
     // Load all current tags
     getTags().then((tags) => {
-        CURRENT_TAGS = tags;
-        setTagList(CURRENT_TAGS);
+        ALL_TAGS = tags;
+        setTagList(ALL_TAGS);
     });
 
     // Set total images in footer
@@ -83,7 +90,7 @@ function RenderPageGallery() {
     let galleryPromise;
 
     // Update the Page Title
-    SetPageTitle();
+    setPageTitle();
 
     // Determine if we are viewing images or videos and get the corresponding promise
     if (PAGE_TYPE === PAGE_IMAGES) {
@@ -143,6 +150,10 @@ function RenderPageGallery() {
             // Card Figure Image- Thumbnail
             const cardFigureImage = document.createElement('img');
             cardFigureImage.setAttribute('alt', '');
+            cardFigureImage.classList.add('gallery-image');
+            if (BLUR_THUMBNAILS) {
+                cardFigureImage.classList.add('thumb-blur');
+            }
             cardFigureImage.setAttribute('src', thumbnail_path);
 
             // Card Footer
@@ -227,6 +238,9 @@ function RenderPageGallery() {
 
         // Generate Pagination
         RenderGalleryPagination();
+
+        // Scroll to top of page
+        document.body.scrollIntoView({behavior: "smooth"});
     });
 }
 
@@ -389,6 +403,7 @@ function RenderPageMediaTags(itemID) {
         if (PAGE_TYPE === PAGE_IMAGES || mediaExtension === 'gif') {
             const mediaItem = document.createElement('img');
             mediaItem.setAttribute('id', 'tag-image');
+            mediaItem.setAttribute('data-id', itemID);
             mediaItem.setAttribute('alt', '');
             mediaItem.setAttribute('src', mediaURL);
             mediaContainer.empty().append(mediaItem);
@@ -396,6 +411,7 @@ function RenderPageMediaTags(itemID) {
         } else {
             const mediaItem = document.createElement('video');
             mediaItem.setAttribute('id', 'tag-video');
+            mediaItem.setAttribute('data-id', itemID);
             mediaItem.setAttribute('controls', 'controls');
             mediaItem.setAttribute('src', mediaURL);
             mediaItem.setAttribute('type', 'video/' + mediaExtension);
@@ -419,9 +435,6 @@ function RenderPageMediaTags(itemID) {
         $('#item-tags-content').removeClass('is-hidden');
         $('#gallery-content').addClass('is-hidden');
     });
-
-    // Add Bindings for the Tag Page
-    AddEventListenersMediaTags();
 }
 
 /**
@@ -460,6 +473,7 @@ function AddEventListenersNavigation() {
             CURRENT_PAGE = 1;
         }
         PAGE_TYPE = PAGE_IMAGES;
+        CURRENT_TAGS = [];
         NavigationSetActive($(this));
         RenderPageGallery();
     });
@@ -470,6 +484,7 @@ function AddEventListenersNavigation() {
             CURRENT_PAGE = 1;
         }
         PAGE_TYPE = PAGE_VIDEOS;
+        CURRENT_TAGS = [];
         NavigationSetActive($(this));
         RenderPageGallery();
     });
@@ -477,7 +492,50 @@ function AddEventListenersNavigation() {
     // Main Links - Tags
     $('#nav-tags-link').on('click', function () {
         PAGE_TYPE = PAGE_TAGS;
+        CURRENT_TAGS = [];
         RenderPageTags();
+    });
+
+    // Blur Images Button
+    $('#blur-thumbs').on('click', function () {
+        if (BLUR_THUMBNAILS) {
+            BLUR_THUMBNAILS = false;
+            $(this).removeClass('is-success');
+            $(this).html('Blur: Off');
+            $('.gallery-image').removeClass('thumb-blur');
+        } else if (!BLUR_THUMBNAILS) {
+            BLUR_THUMBNAILS = true;
+            $(this).addClass('is-success');
+            $(this).html('Blur: On');
+            $('.gallery-image').addClass('thumb-blur');
+        }
+    });
+
+    // Items Per-Page
+    $('#items-per-page').on('change', function () {
+        ITEMS_PER_PAGE = $(this).val();
+        CURRENT_PAGE = 1;
+        RenderPageGallery();
+    });
+
+    // Search Items with Tags
+    $('#search-tags').on('click', function () {
+        const searchTags = $('#nav_search_tags').val().split(',');
+        CURRENT_TAGS = searchTags.map(tag => tag.trim());
+        CURRENT_PAGE = 1;
+        $(this).toggleClass('is-hidden');
+        $('#reset-tags').toggleClass('is-hidden');
+        RenderPageGallery();
+    });
+
+    // Reset Search Items with Tags
+    $('#reset-tags').on('click', function () {
+        $('#nav_search_tags').val('');
+        CURRENT_TAGS = [];
+        CURRENT_PAGE = 1;
+        $(this).toggleClass('is-hidden');
+        $('#search-tags').toggleClass('is-hidden');
+        RenderPageGallery();
     });
 }
 
@@ -493,6 +551,10 @@ function AddEventListenersGallery() {
     });
 }
 
+/**
+ * @function AddEventListenersGalleryPagination
+ * @description Binds the pagination links to their respective functions.
+ */
 function AddEventListenersGalleryPagination() {
     // Pagination Links
     $('.pagination-link').on('click', function () {
@@ -500,6 +562,7 @@ function AddEventListenersGalleryPagination() {
         RenderPageGallery();
     });
 
+    // Pagination - Nest
     $('.pagination-next').on('click', function () {
         if ($(this).hasClass('is-disabled') === false) {
             CURRENT_PAGE = CURRENT_PAGE + 1;
@@ -507,6 +570,7 @@ function AddEventListenersGalleryPagination() {
         }
     });
 
+    // Pagination - Previous
     $('.pagination-previous').on('click', function () {
         if ($(this).hasClass('is-disabled') === false) {
             CURRENT_PAGE = CURRENT_PAGE - 1;
@@ -531,13 +595,27 @@ function AddEventListenersMediaTags() {
         // Show the Gallery
         $('#gallery-content').removeClass('is-hidden');
     });
+
+    // Add Tags to Item
+    $('#add-tags').on('click', function () {
+        const tagsInput = $('#add_tag');
+        const tags = tagsInput.val();
+        const itemID = $('#tag-image').data('id');
+
+        addTagsToItem(itemID, tags).then(() => {
+            RenderPageMediaTags(itemID);
+        });
+
+        // Clear Tags Input
+        tagsInput.val('');
+    });
 }
 
 /**
- * @function SetPageTitle
+ * @function setPageTitle
  * @description Sets the page title based on the current page type (images or videos).
  */
-function SetPageTitle() {
+function setPageTitle() {
     let title;
 
     if (PAGE_TYPE === PAGE_VIDEOS) {
@@ -581,7 +659,7 @@ function setTagList(currentTags) {
  * @returns {Promise} A promise that resolves to the page title.
  */
 async function getPageTitle() {
-    const apiLink = `${API_BASE_URL}/pages/title/`;
+    const apiLink = `${API_BASE_URL}/config/title/`;
 
     try {
         const response = await fetch(apiLink)
@@ -602,7 +680,7 @@ async function getPageTitle() {
  * @returns {Promise} A promise that resolves to the tags.
  */
 async function getTags() {
-    const apiLink = `${API_BASE_URL}/tag/`;
+    const apiLink = `${API_BASE_URL}/tags/all/`;
 
     try {
         const response = await fetch(apiLink)
@@ -662,7 +740,13 @@ async function getTotalVideos() {
  * @returns {Promise} A promise that resolves to the total number of image pages.
  */
 async function getTotalImagePages() {
-    const apiLink = `${API_BASE_URL}/pages/images/`;
+    let apiLink;
+
+    if (CURRENT_TAGS.length > 0) {
+        apiLink = `${API_BASE_URL}/pages/images/with-tags/${CURRENT_TAGS.join()}/${ITEMS_PER_PAGE}/`;
+    } else {
+        apiLink = `${API_BASE_URL}/pages/images/${ITEMS_PER_PAGE}/`;
+    }
 
     try {
         const response = await fetch(apiLink)
@@ -682,7 +766,13 @@ async function getTotalImagePages() {
  * @returns {Promise} A promise that resolves to the total number of video pages.
  */
 async function getTotalVideoPages() {
-    const apiLink = `${API_BASE_URL}/pages/videos/`;
+    let apiLink;
+
+    if (CURRENT_TAGS.length > 0) {
+        apiLink = `${API_BASE_URL}/pages/videos/with-tags/${CURRENT_TAGS.join()}/${ITEMS_PER_PAGE}/`;
+    } else {
+        apiLink = `${API_BASE_URL}/pages/videos/${ITEMS_PER_PAGE}/`;
+    }
 
     try {
         const response = await fetch(apiLink)
@@ -703,7 +793,13 @@ async function getTotalVideoPages() {
  * @returns {Promise} A promise that resolves to the images for the page.
  */
 async function getImagesForPage(page) {
-    const apiLink = `${API_BASE_URL}/images/page/${page}/`;
+    let apiLink;
+
+    if (CURRENT_TAGS.length > 0) {
+        apiLink = `${API_BASE_URL}/images/with-tags/${CURRENT_TAGS.join()}/${CURRENT_PAGE}/${ITEMS_PER_PAGE}/`;
+    } else {
+        apiLink = `${API_BASE_URL}/images/page/${page}/${ITEMS_PER_PAGE}/`;
+    }
 
     try {
         const response = await fetch(apiLink)
@@ -724,7 +820,13 @@ async function getImagesForPage(page) {
  * @returns {Promise} A promise that resolves to the videos for the page.
  */
 async function getVideosForPage(page) {
-    const apiLink = `${API_BASE_URL}/videos/page/${page}/`;
+    let apiLink;
+
+    if (CURRENT_TAGS.length > 0) {
+        apiLink = `${API_BASE_URL}/videos/with-tags/${CURRENT_TAGS.join()}/${CURRENT_PAGE}/${ITEMS_PER_PAGE}/`;
+    } else {
+        apiLink = `${API_BASE_URL}/videos/page/${page}/${ITEMS_PER_PAGE}/`;
+    }
 
     try {
         const response = await fetch(apiLink)
@@ -748,9 +850,9 @@ async function getTagsForItem(itemID) {
     let apiLink;
 
     if (PAGE_TYPE === PAGE_IMAGES) {
-        apiLink = `${API_BASE_URL}/tag/for/image/${itemID}/`;
+        apiLink = `${API_BASE_URL}/tags/for/image/${itemID}/`;
     } else if (PAGE_TYPE === PAGE_VIDEOS) {
-        apiLink = `${API_BASE_URL}/tag/for/video/${itemID}/`;
+        apiLink = `${API_BASE_URL}/tags/for/video/${itemID}/`;
     }
 
     try {
@@ -760,5 +862,40 @@ async function getTagsForItem(itemID) {
         return data;
     } catch (error) {
         console.error('Error fetching tags for item:', error);
+    }
+}
+
+/**
+ * @function addTagsToItem
+ * @description Adds tags to a specific image or video.
+ * @async
+ * @param {number} itemID 
+ * @param {string} tags 
+ * @returns {Promise} A promise that resolves to the updated tags for the item.
+ */
+async function addTagsToItem(itemID, tags) {
+    let apiLink;
+
+    if (PAGE_TYPE === PAGE_IMAGES) {
+        apiLink = `${API_BASE_URL}/tags/image/add/`;
+    } else if (PAGE_TYPE === PAGE_VIDEOS) {
+        apiLink = `${API_BASE_URL}/tags/video/add/`;
+    }
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    try {
+        const response = await fetch(apiLink, {
+            method: 'PATCH',
+            body: JSON.stringify({'item_id': itemID, 'tag_list': tags}),
+            headers: myHeaders,
+        });
+
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        console.error('Error adding tags to item:', error);
     }
 }
