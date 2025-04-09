@@ -28,3 +28,7 @@
     min-height: 100vh;
     flex-direction: column;
 }
+
+.thumb-blur {
+    filter: blur(10px) grayscale(0.5);
+}
