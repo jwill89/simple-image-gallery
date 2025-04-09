@@ -92,7 +92,7 @@ class TagStorage
         $tag = null;
 
         // Setup the Query
-        $sql = "SELECT * FROM " . self::MAIN_TABLE . "WHERE tag_name = :tag_name";
+        $sql = "SELECT * FROM " . self::MAIN_TABLE . " WHERE tag_name = :tag_name";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -100,7 +100,7 @@ class TagStorage
         // If prepared successfully
         if ($stmt) {
             // Bind tag name
-            $stmt->bindParam(':tag_name', $tag_name, PDO::PARAM_STR);
+            $stmt->bindValue(':tag_name', $tag_name, PDO::PARAM_STR);
 
             // Try executing
             if ($stmt->execute()) {
@@ -111,7 +111,9 @@ class TagStorage
                 $tag = $stmt->fetch();
 
                 // If failure, reset
-                if (!$tag) { $tag = null; }
+                if (!$tag instanceof Tag) {
+                    $tag = null;
+                }
             }
             
             $stmt->closeCursor();
@@ -132,7 +134,7 @@ class TagStorage
         $tag_exists = $this->retrieveByName($tag_name);
 
         // If we got a tag, return the tag
-        if ($tag_exists !== null) {
+        if ($tag_exists instanceof Tag) {
             return $tag_exists;
         }
 
@@ -225,7 +227,7 @@ class TagStorage
      * @param Tag $tag
      * @return boolean
      */
-    public function addTagToImage(Image $image, Tag $tag): bool
+    public function addTagsToImage(Image $image, array $tag_ids): bool
     {
         // Setup the Query
         $sql = "INSERT INTO " . self::IMAGE_TAG_TABLE . " (image_id, tag_id) VALUES (:image_id, :tag_id)";
@@ -235,19 +237,28 @@ class TagStorage
 
         // If prepared successfully
         if ($stmt) {
-            // Bind data
-            $stmt->bindValue(':image_id', $image->getImageId(), PDO::PARAM_INT);
-            $stmt->bindValue(':tag_id', $tag->getTagId(), PDO::PARAM_INT);
+            // Prepare ID and Parameters for Execute
+            $image_id = $image->getImageId();
+            $params = [];
+
+            foreach ($tag_ids as $tag_id) {
+                $params[] = [
+                    ':image_id' => $image_id,
+                    ':tag_id' => $tag_id
+                ];
+            }
 
             // Try executing
-            if ($stmt->execute()) {
-                return true;
+            foreach ($params as $param) {
+                if (!$stmt->execute($param)) {
+                    return false;
+                }
             }
             
             $stmt->closeCursor();
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -257,7 +268,7 @@ class TagStorage
      * @param Tag $tag
      * @return boolean
      */
-    public function addTagToVideo(Video $video, Tag $tag): bool
+    public function addTagsToVideo(Video $video, array $tag_ids): bool
     {
         // Setup the Query
         $sql = "INSERT INTO " . self::VIDEO_TAG_TABLE . " (video_id, tag_id) VALUES (:video_id, :tag_id)";
@@ -267,19 +278,28 @@ class TagStorage
 
         // If prepared successfully
         if ($stmt) {
-            // Bind data
-            $stmt->bindValue(':video_id', $video->getVideoId(), PDO::PARAM_INT);
-            $stmt->bindValue(':tag_id', $tag->getTagId(), PDO::PARAM_INT);
+            // Prepare ID and Parameters for Execute
+            $video_id = $video->getVideoId();
+            $params = [];
+
+            foreach ($tag_ids as $tag_id) {
+                $params[] = [
+                    ':video_id' => $video_id,
+                    ':tag_id' => $tag_id
+                ];
+            }
 
             // Try executing
-            if ($stmt->execute()) {
-                return true;
+            foreach ($params as $param) {
+                if (!$stmt->execute($param)) {
+                    return false;
+                }
             }
             
             $stmt->closeCursor();
         }
 
-        return false;
+        return true;
     }
 
     /**

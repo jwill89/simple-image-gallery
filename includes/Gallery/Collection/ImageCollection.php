@@ -61,20 +61,22 @@ class ImageCollection
      * @param integer $page_number
      * @return array
      */
-    public function getForPage(int $page_number): array
+    public function getForPage(int $page_number, int $items_per_page = 40): array
     {
-        return $this->storage->retrieveForPage($page_number);
+        return $this->storage->retrieveForPage($page_number, $items_per_page);
     }
 
     /**
      * Gets a number of images based on the supplied page number and tag ID.
      *
-     * @param array $tag_ids
+     * @param array $tag_ids - The tag IDs to filter images by.
+     * @param integer $page_number - The page number to retrieve.
+     * @param integer $items_per_page - The number of items per page.
      * @return array
      */
-    public function getWithTags(array $tag_ids): array
+    public function getWithTags(array $tag_ids, int $page_number, int $items_per_page): array
     {
-        return $this->storage->retrieveWithTags($tag_ids);
+        return $this->storage->retrieveWithTags($tag_ids, $page_number, $items_per_page);
     }
 
     /**
@@ -85,6 +87,17 @@ class ImageCollection
     public function totalImages(): int
     {
         return $this->storage->retrieveTotalImageCount();
+    }
+
+    /**
+     * Gets the total number of images with the supplied tags.
+     *
+     * @param array $tag_ids
+     * @return integer
+     */
+    public function totalImagesWithTags(array $tag_ids): int
+    {
+        return $this->storage->retrieveTotalImageWithTagsCount($tag_ids);
     }
 
     /**

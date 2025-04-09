@@ -4,7 +4,6 @@ namespace Gallery\Storage;
 
 use PDO;
 use PDOException;
-use Gallery\Core\Configuration;
 use Gallery\Core\DatabaseConnection;
 use Gallery\Structure\Image;
 use Gallery\Structure\Tag;
@@ -25,9 +24,6 @@ class ImageStorage
     // Database Connection
     private PDO $db;
 
-    // Items Per Page
-    private int $items_per_page = 40;
-
     /**
      * Class constructor
      * Initializes the Database Connection.
@@ -37,9 +33,6 @@ class ImageStorage
         if (!isset($this->db)) {
             $this->db = DatabaseConnection::getInstance();
         }
-
-        // Get Items Per Page from Configuration
-        $this->items_per_page = Configuration::itemsPerPage();
     }
 
     /**
@@ -128,13 +121,16 @@ class ImageStorage
      * @param array $tag_ids
      * @return array
      */
-    public function retrieveWithTags(array $tag_ids): array
+    public function retrieveWithTags(array $tag_ids, int $page_number, int $items_per_page): array
     {
         // Initialize Images
         $images = [];
 
         // Count the number of tags
         $tag_count = count($tag_ids);
+
+        // Calculate the offset for pagination
+        $offset = ($page_number - 1) * $items_per_page;
 
         // Setup the Query
         $sql = "SELECT img.* FROM " . self::MAIN_TABLE . " img
@@ -143,15 +139,18 @@ class ImageStorage
                     WHERE tag.tag_id IN (" . implode(',', $tag_ids) . ")
                     GROUP BY img.image_id 
                     HAVING COUNT(DISTINCT tag.tag_id) = :tag_count
-                    ORDER BY img.image_id DESC";
+                    ORDER BY img.image_id DESC
+                    LIMIT :limit OFFSET :offset";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
 
         // If prepared successfully
         if ($stmt) {
-            // Bind the tag ID to the query
+            // Bind the parameters to the query
             $stmt->bindParam(':tag_count', $tag_count, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
             // Try executing
             if ($stmt->execute()) {
@@ -167,16 +166,17 @@ class ImageStorage
     /**
      * Retrieves a number of images based on the supplied page number and the number of images per page.
      *
-     * @param integer $page_number
+     * @param integer $page_number - The page number to retrieve.
+     * @param integer $items_per_page - The number of items per page.
      * @return array
      */
-    public function retrieveForPage(int $page_number): array
+    public function retrieveForPage(int $page_number, int $items_per_page = 40): array
     {
         // Initialize Images
         $images = [];
 
         // Calculate the offset for pagination
-        $offset = ($page_number - 1) * $this->items_per_page;
+        $offset = ($page_number - 1) * $items_per_page;
 
         // Setup the Query
         $sql = "SELECT * FROM " . self::MAIN_TABLE . " ORDER BY image_id DESC LIMIT :limit OFFSET :offset";
@@ -187,7 +187,7 @@ class ImageStorage
         // If prepared successfully
         if ($stmt) {
             // Bind the limit and offset parameters
-            $stmt->bindValue(':limit', $this->items_per_page, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
             // Try executing
@@ -219,6 +219,47 @@ class ImageStorage
 
         // If prepared successfully
         if ($stmt) {
+
+            // Try executing
+            if ($stmt->execute()) {
+                $total = (int)$stmt->fetchColumn();
+            }
+
+            $stmt->closeCursor();
+        }
+
+        return $total;
+    }
+
+    /**
+     * Gets the total number of images in the database with specific tags.
+     *
+     * @return integer
+     */
+    public function retrieveTotalImageWithTagsCount(array $tag_ids): int
+    {
+        // Initialize Total Count
+        $total = 0;
+
+        // Count the number of tags
+        $tag_count = count($tag_ids);
+
+        // Setup the Query
+        $sql = "SELECT COUNT(*) FROM (SELECT img.* FROM " . self::MAIN_TABLE . " img
+                    LEFT JOIN " . self::TAGS_TABLE . " tag
+                    USING (image_id)
+                    WHERE tag.tag_id IN (" . implode(',', $tag_ids) . ")
+                    GROUP BY img.image_id 
+                    HAVING COUNT(DISTINCT tag.tag_id) = :tag_count)";
+
+        // Prepare statement
+        $stmt = $this->db->prepare($sql);
+
+        // If prepared successfully
+        if ($stmt) {
+            // Bind the parameters to the query
+            $stmt->bindParam(':tag_count', $tag_count, PDO::PARAM_INT);
+
             // Try executing
             if ($stmt->execute()) {
                 $total = (int)$stmt->fetchColumn();

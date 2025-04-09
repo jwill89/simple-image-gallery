@@ -61,12 +61,13 @@ class VideoCollection
     /**
      * Gets a number of videos based on the supplied page number.
      *
-     * @param integer $page_number
+     * @param integer $page_number - The page number to retrieve.
+     * @param integer $items_per_page - The number of items per page.
      * @return array
      */
-    public function getForPage(int $page_number): array
+    public function getForPage(int $page_number, int $items_per_page): array
     {
-        return $this->storage->retrieveForPage($page_number);
+        return $this->storage->retrieveForPage($page_number, $items_per_page);
     }
 
     /**
@@ -88,6 +89,17 @@ class VideoCollection
     public function totalVideos(): int
     {
         return $this->storage->retrieveTotalVideoCount();
+    }
+
+    /**
+     * Gets the total number of videos in the database with specific tags.
+     *
+     * @param array $tag_ids - The tag IDs to filter videos by.
+     * @return integer
+     */
+    public function totalVideosWithTags(array $tag_ids): int
+    {
+        return $this->storage->retrieveTotalVideoWithTagsCount($tag_ids);
     }
 
     /**

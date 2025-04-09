@@ -124,9 +124,9 @@ class TagCollection
      * @param Tag $tag
      * @return boolean
      */
-    public function addTagToImage(Image $image, Tag $tag): bool
+    public function addTagsToImage(Image $image, array $tag_ids): bool
     {
-        return $this->storage->addTagToImage($image, $tag);
+        return $this->storage->addTagsToImage($image, $tag_ids);
     }
 
     /**
@@ -137,9 +137,9 @@ class TagCollection
      * @param Tag $tag
      * @return boolean
      */
-    public function addTagToVideo(Video $video, Tag $tag): bool
+    public function addTagsToVideo(Video $video, array $tag_ids): bool
     {
-        return $this->storage->addTagToVideo($video, $tag);
+        return $this->storage->addTagsToVideo($video, $tag_ids);
     }
 
     /**

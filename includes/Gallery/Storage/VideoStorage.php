@@ -4,10 +4,8 @@ namespace Gallery\Storage;
 
 use PDO;
 use PDOException;
-use Gallery\Core\Configuration;
 use Gallery\Core\DatabaseConnection;
 use Gallery\Structure\Video;
-use Gallery\Structure\Tag;
 
 /**
  * VideoStorage Class
@@ -25,9 +23,6 @@ class VideoStorage
     // Database Connection
     private PDO $db;
 
-    // Items Per Page
-    private int $items_per_page = 40;
-
     /**
      * Class constructor
      * Initializes the Database Connection.
@@ -37,9 +32,6 @@ class VideoStorage
         if (!isset($this->db)) {
             $this->db = DatabaseConnection::getInstance();
         }
-
-        // Get Items Per Page from Configuration
-        $this->items_per_page = Configuration::itemsPerPage();
     }
 
     /**
@@ -150,7 +142,7 @@ class VideoStorage
 
         // If prepared successfully
         if ($stmt) {
-            // Bind the tag ID to the query
+            // Bind the tag count to the query
             $stmt->bindParam(':tag_count', $tag_count, PDO::PARAM_INT);
 
             // Try executing
@@ -165,51 +157,19 @@ class VideoStorage
     }
 
     /**
-     * Returns an array of videos based on the supplied tag.
-     *
-     * @param Tag $tag
-     * @return array
-     */
-    public function retrieveByTag(Tag $tag): array
-    {
-        // Initialize Videos
-        $videos = [];
-
-        // Setup the Query
-        $sql = "SELECT vid.* FROM " . self::MAIN_TABLE . " vid LEFT JOIN " . self::TAGS_TABLE . " tag USING (video_id) WHERE tag.tag_id = :tag_id ORDER BY video_id DESC";
-
-        // Prepare statement
-        $stmt = $this->db->prepare($sql);
-
-        // If prepared successfully
-        if ($stmt) {
-            // Bind the tag ID to the query
-            $stmt->bindValue(':tag_id', $tag->getTagId(), PDO::PARAM_INT);
-
-            // Try executing
-            if ($stmt->execute()) {
-                $videos = $stmt->fetchAll(PDO::FETCH_CLASS, self::OBJ_CLASS);
-            }
-
-            $stmt->closeCursor();
-        }
-
-        return $videos;
-    }
-
-    /**
      * Retrieves a number of videos based on the supplied page number and the number of videos per page.
      *
-     * @param integer $page_number
+     * @param integer $page_number - The page number to retrieve.
+     * @param integer $items_per_page - The number of items per page.
      * @return array
      */
-    public function retrieveForPage(int $page_number): array
+    public function retrieveForPage(int $page_number, int $items_per_page): array
     {
         // Initialize Videos
         $videos = [];
 
         // Calculate the offset for pagination
-        $offset = ($page_number - 1) * $this->items_per_page;
+        $offset = ($page_number - 1) * $items_per_page;
 
         // Setup the Query
         $sql = "SELECT * FROM " . self::MAIN_TABLE . " ORDER BY video_id DESC LIMIT :limit OFFSET :offset";
@@ -220,7 +180,7 @@ class VideoStorage
         // If prepared successfully
         if ($stmt) {
             // Bind the limit and offset parameters
-            $stmt->bindValue(':limit', $this->items_per_page, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
             // Try executing
@@ -252,6 +212,47 @@ class VideoStorage
 
         // If prepared successfully
         if ($stmt) {
+            // Try executing
+            if ($stmt->execute()) {
+                $total = (int)$stmt->fetchColumn();
+            }
+
+            $stmt->closeCursor();
+        }
+
+        return $total;
+    }
+
+    /**
+     * Gets the total number of videos with specific tags in the database.
+     *
+     * @param array $tag_ids - The tag IDs to filter videos by.
+     * @return integer
+     */
+    public function retrieveTotalVideoWithTagsCount(array $tag_ids): int
+    {
+        // Initialize Total Count
+        $total = 0;
+
+        // Count the number of tags
+        $tag_count = count($tag_ids);
+
+        // Setup the Query
+        $sql = "SELECT COUNT(*) FROM (SELECT vid.* FROM " . self::MAIN_TABLE . " vid
+                    LEFT JOIN " . self::TAGS_TABLE . " tag
+                    USING (video_id)
+                    WHERE tag.tag_id IN (" . implode(',', $tag_ids) . ")
+                    GROUP BY vid.video_id 
+                    HAVING COUNT(DISTINCT tag.tag_id) = :tag_count)";
+
+        // Prepare statement
+        $stmt = $this->db->prepare($sql);
+
+        // If prepared successfully
+        if ($stmt) {
+            // Bind the tag count to the query
+            $stmt->bindParam(':tag_count', $tag_count, PDO::PARAM_INT);
+
             // Try executing
             if ($stmt->execute()) {
                 $total = (int)$stmt->fetchColumn();
