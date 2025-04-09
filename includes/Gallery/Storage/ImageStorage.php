@@ -6,7 +6,6 @@ use PDO;
 use PDOException;
 use Gallery\Core\DatabaseConnection;
 use Gallery\Structure\Image;
-use Gallery\Structure\Tag;
 
 /**
  * ImageStorage Class
