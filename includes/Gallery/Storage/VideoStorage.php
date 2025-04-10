@@ -306,7 +306,7 @@ class VideoStorage
     {
         // Check if already exists
         if (empty($video->getVideoId())) {
-            $sql = "INSERT INTO " . self::MAIN_TABLE . " (file_name, file_time) VALUES (:file_name, :file_time)";
+            $sql = "INSERT INTO " . self::MAIN_TABLE . " (file_name, file_time, hash) VALUES (:file_name, :file_time, :hash)";
 
             // Prepare statement
             $stmt = $this->db->prepare($sql);
@@ -315,6 +315,7 @@ class VideoStorage
             if ($stmt) {
                 $stmt->bindValue(':file_name', $video->getFileName(), PDO::PARAM_STR);
                 $stmt->bindValue(':file_time', $video->getFileTime(), PDO::PARAM_INT);
+                $stmt->bindValue(':hash', $video->getHash(), PDO::PARAM_STR);
 
                 // Execute statement
                 if ($stmt->execute()) {

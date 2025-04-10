@@ -13,6 +13,7 @@ class Video extends AbstractStructure
     private int $video_id = 0;
     private string $file_name = '';
     private int $file_time = 0;
+    private string $hash = '';
 
     /**
      * Get the ID of the video.
@@ -42,6 +43,16 @@ class Video extends AbstractStructure
     public function getFileTime(): int
     {
         return $this->file_time;
+    }
+
+    /**
+     * Get the md5 hash of the video
+     *
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return $this->hash;
     }
 
     /**
@@ -77,6 +88,18 @@ class Video extends AbstractStructure
     public function setFileTime(int $file_time): self
     {
         $this->file_time = $file_time;
+        return $this;
+    }
+
+    /**
+     * Set the md5 hash of the video
+     *
+     * @param string $hash
+     * @return Video
+     */
+    public function setHash(string $hash): self
+    {
+        $this->hash = $hash;
         return $this;
     }
 }
