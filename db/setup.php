@@ -60,10 +60,11 @@ if (!$db_exists) {
     // Setup the SQL for the table creation
     $sql = <<<SQL
     CREATE TABLE IF NOT EXISTS "images" (
-        "image_id"    INTEGER NOT NULL UNIQUE,
-        "file_name"   TEXT NOT NULL UNIQUE,
-        "file_time"   INTEGER NOT NULL,
-        "hash"        TEXT,
+        "image_id"	INTEGER NOT NULL UNIQUE,
+        "file_name"	TEXT NOT NULL UNIQUE,
+        "file_time"	INTEGER NOT NULL,
+        "hash"	TEXT NOT NULL,
+        "bits_fingerprint"	TEXT NOT NULL,
         PRIMARY KEY("image_id" AUTOINCREMENT)
     )
     SQL;
@@ -91,7 +92,7 @@ if (!$db_exists) {
 
     // Setup the SQL for the table creation
     $sql = <<<SQL
-    CREATE TABLE "tag_categories" (
+    CREATE TABLE IF NOT EXISTS "tag_categories" (
         "category_id"	INTEGER NOT NULL,
         "category_name"	TEXT NOT NULL UNIQUE COLLATE NOCASE,
         PRIMARY KEY("category_id" AUTOINCREMENT)
@@ -152,7 +153,7 @@ if (!$db_exists) {
 
     // Setup the SQL for the table creation
     $sql = <<<SQL
-    CREATE TABLE "tags" (
+    CREATE TABLE IF NOT EXISTS "tags" (
         "tag_id"	INTEGER NOT NULL UNIQUE,
         "category_id"	INTEGER NOT NULL DEFAULT 1,
         "tag_name"	TEXT NOT NULL UNIQUE COLLATE NOCASE,
@@ -188,6 +189,7 @@ if (!$db_exists) {
         "video_id"	INTEGER NOT NULL UNIQUE,
         "file_name"	TEXT NOT NULL UNIQUE,
         "file_time"	INTEGER NOT NULL,
+        "hash"	TEXT NOT NULL,
         PRIMARY KEY("video_id" AUTOINCREMENT)
     )
     SQL;
