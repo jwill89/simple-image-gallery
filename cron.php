@@ -51,19 +51,23 @@ usort($videos_in_folder, function ($a, $b) {
     return filemtime(VideoCollection::VIDEO_DIRECTORY . $a) <=> filemtime(VideoCollection::VIDEO_DIRECTORY . $b);
 });
 
+// Get the images already in the database
+$videos_in_database = $video_collection->getAll();
+
 // Initialize Counters
 $images_added = 0;
 $images_removed = 0;
 $images_not_added = 0;
 $videos_added = 0;
+$videos_removed = 0;
 $videos_not_added = 0;
 
-// Initialize Image Hash Array
+// Initialize Hash Arrays
 $image_hashes = [];
+$video_hashes = [];
 
 // Remove images from the database that do not exist in the images folder
 /** @var Image $img */
-
 foreach($images_in_database as $img) {
 
     if (!file_exists($image_dir_full . $img->getFileName())) {
@@ -76,30 +80,30 @@ foreach($images_in_database as $img) {
     } else {
 		
 		// Image Exists, add it to our hash array
-		$hash_array[] = $img->getHash();
+		$image_hashes[] = $img->getHash();
 		
 	}
-
 }
 
 
-/*
 // Remove videos from the database that do not exist in the videos folder
-foreach($videos_in_database as $key => $file_name) {
+/** @var Video $vid */
+foreach($videos_in_database as $vid) {
 	
-	if (!file_exists($video_directory . $file_name)) {
-		
-		// Delete from DB
-		if ($db->deleteVideoByFilename($file_name)) {
-			
+	if (!file_exists($video_dir_full . $vid->getFileName())) {
+
+        // Delete from DB
+        if ($video_collection->delete($vid)) {
 			$videos_removed++;
-			
 		}
+
+    } else {
+		
+		// Image Exists, add it to our hash array
+		$video_hashes[] = $vid->getHash();
 		
 	}
-	
 }
-*/
 
 // Add New Images
 foreach($images_in_folder as $file_name){
@@ -108,7 +112,7 @@ foreach($images_in_folder as $file_name){
     $image_md5 = md5_file(ImageCollection::IMAGE_DIRECTORY . $file_name);
 
     // Make sure the file doesn't already exist, check by MD5. Image Hash not necessary *yet*
-    if (!in_array($image_md5, $hash_array)) {
+    if (!in_array($image_md5, $image_hashes)) {
 
         // Create the Image
 		$image = new Image();
@@ -139,19 +143,21 @@ foreach($images_in_folder as $file_name){
 		continue;
 
 	}
-
 }
 
 // Loop Through Videos and GIFs
 foreach ($videos_in_folder as $file_name) {
+
+	$video_md5 = md5_file(VideoCollection::VIDEO_DIRECTORY . $file_name);
 	
-	// Ensure the Video Doesn't Exist
-	if (!file_exists(VideoCollection::VIDEO_DIRECTORY_FULL . $file_name)) {
+	// Make sure the file doesn't already exist, check by MD5. Video Hash not necessary *yet*
+    if (!in_array($video_md5, $video_hashes)) {
 		
 		// Create a new video
 		$video = new Video();
 		$video->setFileName($file_name)
-			->setFileTime(filemtime(VideoCollection::VIDEO_DIRECTORY . $file_name));
+			->setFileTime(filemtime(VideoCollection::VIDEO_DIRECTORY . $file_name))
+			->setHash($video_md5);
 	
 		// Save the video
 		if ($video_collection->save($video) !== 0) {
@@ -176,7 +182,6 @@ foreach ($videos_in_folder as $file_name) {
         continue;
 		
 	}
-
 }
 
 
@@ -191,5 +196,6 @@ echo "<strong>Images Added</strong>: {$images_added}</br>";
 echo "<strong>Images Removed</strong>: {$images_removed}</br>";
 echo "<strong>Images Not Added</strong>: {$images_not_added}</br>";
 echo "<strong>Videos Added</strong>: {$videos_added}</br>";
+echo "<strong>Videos Removed</strong>: {$videos_removed}</br>";
 echo "<strong>Videos Not Added</strong>: {$videos_not_added}</br>";
 echo "<strong>Execution Time</strong>: {$execution_time}</br>";
