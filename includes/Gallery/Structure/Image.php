@@ -5,7 +5,7 @@ namespace Gallery\Structure;
 /**
  * Image class
  * This class represents an image in the gallery.
- * It contains properties for the image ID, file name, file time, and md5 hash.
+ * It contains properties for the image ID, file name, file time, and md5 hash, and the hex fingerprint.
  */
 class Image extends AbstractStructure
 {
@@ -14,6 +14,7 @@ class Image extends AbstractStructure
     private string $file_name = '';
     private int $file_time = 0;
     private string $hash = '';
+    private string $bits_fingerprint = '';
 
     /**
      * @return int
@@ -45,6 +46,14 @@ class Image extends AbstractStructure
     public function getHash(): string
     {
         return $this->hash;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBitsFingerprint(): string
+    {
+        return $this->bits_fingerprint;
     }
 
     /**
@@ -84,6 +93,16 @@ class Image extends AbstractStructure
     public function setHash(string $hash): self
     {
         $this->hash = $hash;
+        return $this;
+    }
+
+    /**
+     * @param string $bits_fingerprint
+     * @return Image
+     */
+    public function setBitsFingerprint(string $bits_fingerprint): self
+    {
+        $this->bits_fingerprint = $bits_fingerprint;
         return $this;
     }
 }

@@ -5,6 +5,8 @@ namespace Gallery\Collection;
 use Imagick;
 use ImagickException;
 use OutOfBoundsException;
+use Jenssegers\ImageHash\ImageHash;
+use Jenssegers\ImageHash\Implementations\DifferenceHash;
 use Gallery\Storage\ImageStorage;
 use Gallery\Structure\Image;
 
@@ -144,6 +146,26 @@ class ImageCollection
     }
 
     /**
+     * Generates a fingerprint for the image using the DifferenceHash algorithm and stores as bits.
+     *
+     * @param Image $image_obj
+     * @return string
+     */
+    public function createFingerprint(Image $image_obj): string
+    {
+        // Get the Hasher based on DifferenceHash
+        $hasher = new ImageHash(new DifferenceHash());
+
+        // Generate the Hash Fingerprint
+        $hash = $hasher->hash(self::IMAGE_DIRECTORY . $image_obj->getFileName());
+
+        // Store the fingerprint in Bits format
+        $image_obj->setBitsFingerprint($hash->toBits());
+
+        return $hash;
+    }
+
+    /**
      * Saves an image to the database and generates a thumbnail.
      *
      * @param Image $image
@@ -151,6 +173,11 @@ class ImageCollection
      */
     public function save(Image $image): int
     {
+        // Check for fingerprint and generate if not set
+        if (empty($image->getBitsFingerprint())) {
+            $this->createFingerprint($image);
+        }
+
         // Save the image to the database
         $image_id = $this->storage->store($image);
 

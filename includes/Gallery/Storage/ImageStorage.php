@@ -314,7 +314,7 @@ class ImageStorage
     {
         // Check if already exists
         if (empty($image->getImageId())) {
-            $sql = "INSERT INTO " . self::MAIN_TABLE . " (file_name, file_time, hash) VALUES (:file_name, :file_time, :hash)";
+            $sql = "INSERT INTO " . self::MAIN_TABLE . " (file_name, file_time, hash, bits_fingerprint) VALUES (:file_name, :file_time, :hash, :bits_fingerprint)";
 
             // Prepare statement
             $stmt = $this->db->prepare($sql);
@@ -324,6 +324,7 @@ class ImageStorage
                 $stmt->bindValue(':file_name', $image->getFileName(), PDO::PARAM_STR);
                 $stmt->bindValue(':file_time', $image->getFileTime(), PDO::PARAM_INT);
                 $stmt->bindValue(':hash', $image->getHash(), PDO::PARAM_STR);
+                $stmt->bindValue(':bits_fingerprint', $image->getBitsFingerprint(), PDO::PARAM_STR);
 
                 // Execute statement
                 if ($stmt->execute()) {
