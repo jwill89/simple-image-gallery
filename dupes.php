@@ -52,8 +52,11 @@ foreach ($images_in_database as $img) {
 			$hash2 = Hash::fromBits($img2->getBitsFingerprint());
 					
 			if ($hasher->distance($hash1, $hash2) <= 2) {
-				$matches[] = [$img->getImageId(), $img2->getImageId()];
-				
+				// Check to see if the opposite is already in the array
+				if (!in_array([$img2->getImageId(), $img->getImageId()], $matches)) {
+					// Add the potential duplicates to the array
+					$matches[] = [$img->getImageId(), $img2->getImageId()];
+				}
 			}
 			
 		}
