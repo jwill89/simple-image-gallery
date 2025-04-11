@@ -3,9 +3,11 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
-        "allow-plugins": {},
+        "allow-plugins": {
+            "phpdocumentor/shim": true
+        },
         "platform": {
-            "php": "8.3.19"
+            "php": "8.3.20"
         }
     },
     "require": {
@@ -25,6 +27,7 @@
     "require-dev": {
         "roave/security-advisories": "dev-latest",
         "squizlabs/php_codesniffer": "*",
-        "friendsofphp/php-cs-fixer": "*"
+        "friendsofphp/php-cs-fixer": "*",
+        "phpdocumentor/shim": "*"
     }
 }
