@@ -4,6 +4,9 @@
 require_once('../vendor/autoload.php');
 
 use DI\Container;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
 use Routes\Internal\ImageController;
@@ -32,9 +35,10 @@ $app->addRoutingMiddleware();
 $error_middleware = $app->addErrorMiddleware(true, true, true);
 
 // Setup Allowables and Response Origins
-$app->add(function($request, $handler) {
+$app->add(function(ServerRequestInterface $request,  RequestHandlerInterface $handler): ResponseInterface {
     $response = $handler->handle($request);
     return $response
+        ->withHeader('Access-Control-Allow-Credentials', 'true')
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, PATCH')
