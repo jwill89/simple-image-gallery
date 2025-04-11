@@ -7,6 +7,7 @@ use ImagickException;
 use OutOfBoundsException;
 use Jenssegers\ImageHash\ImageHash;
 use Jenssegers\ImageHash\Implementations\DifferenceHash;
+use Gallery\Core\Configuration;
 use Gallery\Storage\ImageStorage;
 use Gallery\Structure\Image;
 
@@ -39,8 +40,9 @@ class ImageCollection
     /**
      * Gets an image based on supplied image ID.
      * 
-     * @param integer $image_id
-     * @return Image
+     * @param int $image_id The ID of the image to retrieve.
+     * 
+     * @return Image The Image object corresponding to the supplied ID.
      */
     public function get(int $image_id): Image
     {
@@ -50,7 +52,7 @@ class ImageCollection
     /**
      * Gets all images.
      *
-     * @return array
+     * @return Image[] An array of Image objects.
      */
     public function getAll(): array
     {
@@ -60,11 +62,16 @@ class ImageCollection
     /**
      * Gets a number of images based on the supplied page number.
      *
-     * @param integer $page_number
-     * @return array
+     * @param int $page_number The page number to retrieve.
+     * @param int|null $items_per_page Optional. The number of items per page. Defaults to the number set in the Configuration.
+     * 
+     * @return Image[] An array of Image objects for the specified page.
      */
-    public function getForPage(int $page_number, int $items_per_page = 40): array
-    {
+    public function getForPage(int $page_number, ?int $items_per_page = null): array
+    {   
+        // Default to the number set in the Configuration if not provided
+        $items_per_page = $items_per_page ?? Configuration::DEFAULT_PER_PAGE;
+
         return $this->storage->retrieveForPage($page_number, $items_per_page);
     }
 
@@ -72,19 +79,23 @@ class ImageCollection
      * Gets a number of images based on the supplied page number and tag ID.
      *
      * @param array $tag_ids - The tag IDs to filter images by.
-     * @param integer $page_number - The page number to retrieve.
-     * @param integer $items_per_page - The number of items per page.
-     * @return array
+     * @param int $page_number - The page number to retrieve.
+     * @param int|null $items_per_page Optional. The number of items per page. Defaults to the number set in the Configuration.
+     * 
+     * @return Image[] An array of Image objects for the specified page and tags.
      */
-    public function getWithTags(array $tag_ids, int $page_number, int $items_per_page): array
+    public function getWithTags(array $tag_ids, int $page_number, ?int $items_per_page = null): array
     {
+        // Default to the number set in the Configuration if not provided
+        $items_per_page = $items_per_page ?? Configuration::DEFAULT_PER_PAGE;
+
         return $this->storage->retrieveWithTags($tag_ids, $page_number, $items_per_page);
     }
 
     /**
      * Gets the total number of images in the database.
      *
-     * @return integer
+     * @return int The total number of images.
      */
     public function totalImages(): int
     {
@@ -94,8 +105,9 @@ class ImageCollection
     /**
      * Gets the total number of images with the supplied tags.
      *
-     * @param array $tag_ids
-     * @return integer
+     * @param array $tag_ids The tag IDs to filter images by.
+     * 
+     * @return int The total number of images with the specified tags.
      */
     public function totalImagesWithTags(array $tag_ids): int
     {
@@ -103,6 +115,11 @@ class ImageCollection
     }
 
     /**
+     * Creates a thumbnail for the supplied image object.
+     * The thumbnail is resized to a maximum width or height of 200 pixels, maintaining the aspect ratio.
+     * 
+     * @param Image $image_obj The image object for which to create a thumbnail.
+     * 
      * @throws ImagickException
      */
     public function createThumbnail(Image $image_obj): void
@@ -148,8 +165,9 @@ class ImageCollection
     /**
      * Generates a fingerprint for the image using the DifferenceHash algorithm and stores as bits.
      *
-     * @param Image $image_obj
-     * @return string
+     * @param Image $image_obj The image object for which to create a fingerprint.
+     * 
+     * @return string The generated fingerprint in bit format.
      */
     public function createFingerprint(Image $image_obj): string
     {
@@ -166,9 +184,10 @@ class ImageCollection
     }
 
     /**
-     * Saves an image to the database and generates a thumbnail.
+     * Saves an image to the database and calls the function to generate a fingerprint and thumbnail.
      *
-     * @param Image $image
+     * @param Image $image The image object to save.
+     * 
      * @return int The ID of the newly saved image.
      */
     public function save(Image $image): int
@@ -196,8 +215,9 @@ class ImageCollection
     /**
      * Deletes an image from the database and the filesystem.
      *
-     * @param Image $image
-     * @return bool
+     * @param Image $image The image object to delete.
+     * 
+     * @return bool True if the image was successfully deleted, false otherwise.
      */
     public function delete(Image $image): bool
     {

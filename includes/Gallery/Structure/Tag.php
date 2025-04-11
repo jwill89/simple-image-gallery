@@ -10,12 +10,13 @@ class Tag extends AbstractStructure
 {
     // Properties
     private int $tag_id = 0;
+    private int $category_id = 0;
     private string $tag_name = '';
 
     /**
      * Get the ID of the tag.
      *
-     * @return int
+     * @return int The ID of the tag.
      */
     public function getTagId(): int
     {
@@ -23,9 +24,19 @@ class Tag extends AbstractStructure
     }
 
     /**
+     * Get the ID of the category.
+     *
+     * @return int The ID of the category.
+     */
+    public function getCategoryId(): int
+    {
+        return $this->category_id;
+    }
+
+    /**
      * Get the tag name.
      *
-     * @return string
+     * @return string The name of the tag.
      */
     public function getTagName(): string
     {
@@ -35,8 +46,9 @@ class Tag extends AbstractStructure
     /**
      * Set the ID of the tag.
      *
-     * @param int $tag_id
-     * @return Tag
+     * @param int $tag_id The ID of the tag.
+     * 
+     * @return $this Returns the current instance for method chaining.
      */
     public function setTagId(int $tag_id): self
     {
@@ -45,10 +57,24 @@ class Tag extends AbstractStructure
     }
 
     /**
+     * Set the ID of the category.
+     *
+     * @param int $category_id The ID of the category.
+     * 
+     * @return $this Returns the current instance for method chaining.
+     */
+    public function setCategoryId(int $category_id): self
+    {
+        $this->category_id = $category_id;
+        return $this;
+    }
+
+    /**
      * Set the tag name.
      *
-     * @param string $tag_name
-     * @return Tag
+     * @param string $tag_name The name of the tag.
+     * 
+     * @return $this Returns the current instance for method chaining.
      */
     public function setTagName(string $tag_name): self
     {

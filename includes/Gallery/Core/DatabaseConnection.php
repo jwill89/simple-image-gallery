@@ -35,7 +35,8 @@ class DatabaseConnection
      * This function returns a singleton instance of the database connection.
      * It checks if the connection is already established, and if not, it creates a new PDO instance.
      * It also handles exceptions in case the database file is not found.
-     * @return PDO
+     * 
+     * @return PDO The PDO instance representing the database connection.
      */
     public static function getInstance(): PDO
     {

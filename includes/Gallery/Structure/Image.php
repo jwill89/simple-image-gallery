@@ -5,7 +5,7 @@ namespace Gallery\Structure;
 /**
  * Image class
  * This class represents an image in the gallery.
- * It contains properties for the image ID, file name, file time, and md5 hash, and the hex fingerprint.
+ * It contains properties for the image ID, file name, file time, and md5 hash, and the bit fingerprint.
  */
 class Image extends AbstractStructure
 {
@@ -17,7 +17,9 @@ class Image extends AbstractStructure
     private string $bits_fingerprint = '';
 
     /**
-     * @return int
+     * Get the ID of the image.
+     * 
+     * @return int The ID of the image.
      */
     public function getImageId(): int
     {
@@ -25,7 +27,9 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @return string
+     * Get the file name of the image.
+     * 
+     * @return string The file name of the image.
      */
     public function getFileName(): string
     {
@@ -33,7 +37,9 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @return int
+     * Get the file time of the image.
+     * 
+     * @return int The file time as a Unix timestamp.
      */
     public function getFileTime(): int
     {
@@ -41,7 +47,9 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @return string
+     * Get the md5 hash of the image
+     * 
+     * @return string The md5 hash of the image.
      */
     public function getHash(): string
     {
@@ -49,7 +57,9 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @return string
+     * Get the bit fingerprint of the image
+     * 
+     * @return string The bit fingerprint of the image.
      */
     public function getBitsFingerprint(): string
     {
@@ -57,8 +67,11 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @param int $image_id
-     * @return Image
+     * Set the ID of the image.
+     * 
+     * @param int $image_id The ID to set.
+     * 
+     * @return $this Returns the current instance for method chaining.
      */
     public function setImageId(int $image_id): self
     {
@@ -67,8 +80,11 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @param string $file_name
-     * @return Image
+     * Set the file name of the image.
+     * 
+     * @param string $file_name The file name to set.
+     * 
+     * @return $this Returns the current instance for method chaining.
      */
     public function setFileName(string $file_name): self
     {
@@ -77,8 +93,11 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @param int $file_time
-     * @return Image
+     * Set the file time of the image.
+     * 
+     * @param int $file_time The file time to set.
+     * 
+     * @return $this Returns the current instance for method chaining.
      */
     public function setFileTime(int $file_time): self
     {
@@ -87,8 +106,11 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @param string $hash
-     * @return Image
+     * Set the md5 hash of the image
+     * 
+     * @param string $hash The md5 hash to set.
+     * 
+     * @return $this Returns the current instance for method chaining.
      */
     public function setHash(string $hash): self
     {
@@ -97,8 +119,11 @@ class Image extends AbstractStructure
     }
 
     /**
-     * @param string $bits_fingerprint
-     * @return Image
+     * Set the bit fingerprint of the image
+     * 
+     * @param string $bits_fingerprint The bit fingerprint to set.
+     * 
+     * @return $this Returns the current instance for method chaining.
      */
     public function setBitsFingerprint(string $bits_fingerprint): self
     {

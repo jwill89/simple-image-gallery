@@ -3,7 +3,6 @@
 namespace Gallery\Storage;
 
 use PDO;
-use PDOException;
 use Gallery\Core\DatabaseConnection;
 use Gallery\Structure\Tag;
 use Gallery\Structure\Image;
@@ -11,7 +10,10 @@ use Gallery\Structure\Video;
 
 /**
  * TagStorage Class
+ * 
  * This class is responsible for managing tag storage in the database.
+ * It provides methods to retrieve, create, update, and delete tags,
+ * as well as associate tags with images and videos.
  */
 class TagStorage
 {
@@ -21,7 +23,7 @@ class TagStorage
     private const string VIDEO_TAG_TABLE = 'video_tags';
 
     // Main Class Object Constant
-    private const OBJ_CLASS = Tag::class;
+    private const string OBJ_CLASS = Tag::class;
 
     // Database Connection
     private PDO $db;
@@ -40,8 +42,9 @@ class TagStorage
     /**
      * Retrieves a tag or an array of tag from the database.
      *
-     * @param integer|null $tag_id
-     * @return Tag|array
+     * @param integer|null $tag_id Optional. The ID of the tag to retrieve. If null, retrieves all tags.
+     * 
+     * @return Tag|Tag[] An array of Tag objects or a single Tag object if an ID is provided.
      */
     public function retrieve(?int $tag_id = null): Tag|array
     {
@@ -83,8 +86,9 @@ class TagStorage
     /**
      * Retrieves a tag from the database based on tag name or returns null if it doesn't exist
      *
-     * @param string $tag_name
-     * @return Tag|null
+     * @param string $tag_name The name of the tag to retrieve.
+     * 
+     * @return Tag|null The tag object if found, null otherwise.
      */
     public function retrieveByName(string $tag_name): ?Tag
     {
@@ -111,7 +115,7 @@ class TagStorage
                 $tag = $stmt->fetch();
 
                 // If failure, reset
-                if (!$tag instanceof Tag) {
+                if (!($tag instanceof Tag)) {
                     $tag = null;
                 }
             }
@@ -125,8 +129,9 @@ class TagStorage
     /**
      * Retrieves a tag if it exists or creates it and stores it if it doesn't.
      *
-     * @param string $tag_name
-     * @return Tag
+     * @param string $tag_name The name of the tag to retrieve or create.
+     * 
+     * @return Tag The tag object.
      */
     public function retrieveOrCreate(string $tag_name): Tag
     {
@@ -155,8 +160,9 @@ class TagStorage
     /**
      * Get tags based on supplied image.
      *
-     * @param Image $image
-     * @return array
+     * @param Image $image The image to retrieve tags for.
+     * 
+     * @return Tag[] An array of Tag objects associated with the image.
      */
     public function retrieveTagsForImage(Image $image): array
     {
@@ -189,8 +195,9 @@ class TagStorage
     /**
      * Get tags based on supplied video.
      *
-     * @param Video $video_id
-     * @return array
+     * @param Video $video_id The video to retrieve tags for.
+     * 
+     * @return Tag[] An array of Tag objects associated with the video.
      */
     public function retrieveTagsForVideo(Video $video): array
     {
@@ -221,11 +228,12 @@ class TagStorage
     }
 
     /**
-     * addTagToImage function
+     * Add tags to an image.
      *
-     * @param Image $image
-     * @param Tag $tag
-     * @return boolean
+     * @param Image $image Image object to which tags will be added.
+     * @param array $tag_ids Array of tag IDs to be added to the image.
+     * 
+     * @return bool True on success, false on failure.
      */
     public function addTagsToImage(Image $image, array $tag_ids): bool
     {
@@ -262,11 +270,12 @@ class TagStorage
     }
 
     /**
-     * addTagToVideo function
+     * Add tags to a video.
      *
-     * @param Video $video
-     * @param Tag $tag
-     * @return boolean
+     * @param Video $video Video object to which tags will be added.
+     * @param array $tag_ids Array of tag IDs to be added to the video.
+     * 
+     * @return bool True on success, false on failure.
      */
     public function addTagsToVideo(Video $video, array $tag_ids): bool
     {
@@ -303,11 +312,12 @@ class TagStorage
     }
 
     /**
-     * removeTagFromImage function
+     * Removes a tag from an image.
      *
-     * @param Image $image
-     * @param Tag $tag
-     * @return boolean
+     * @param Image $image The image from which the tag will be removed.
+     * @param Tag $tag The tag to be removed.
+     * 
+     * @return bool True on success, false on failure.
      */
     public function removeTagFromImage(Image $image, Tag $tag): bool
     {
@@ -335,11 +345,12 @@ class TagStorage
     }
 
     /**
-     * removeTagFromVideo function
+     * Removes a tag from a video
      *
-     * @param Video $video
-     * @param Tag $tag
-     * @return boolean
+     * @param Video $video The video from which the tag will be removed.
+     * @param Tag $tag The tag to be removed.
+     * 
+     * @return bool True on success, false on failure.
      */
     public function removeTagFromVideo(Video $video, Tag $tag): bool
     {
@@ -367,9 +378,9 @@ class TagStorage
     }
 
     /**
-     * Gets the total number of images in the database.
+     * Gets the total number of tags in the database.
      *
-     * @return integer
+     * @return int The total number of tags.
      */
     public function retrieveTotalTagCount(): int
     {
@@ -377,7 +388,7 @@ class TagStorage
         $total = 0;
 
         // Setup the Query
-        $sql = "SELECT COUNT(*) AS total_images FROM " . self::MAIN_TABLE;
+        $sql = "SELECT COUNT(*) AS total_tags FROM " . self::MAIN_TABLE;
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -397,9 +408,10 @@ class TagStorage
 
     /**
      * Check if a tag exists in the database based on tag title.
-     * @param string $tag_name 
-     * @return bool 
-     * @throws PDOException 
+     * 
+     * @param string $tag_name The name of the tag to check.
+     * 
+     * @return bool True if the tag exists, false otherwise.
      */
     public function tagExists(string $tag_name): bool
     {
@@ -428,10 +440,11 @@ class TagStorage
     }
 
     /**
-     * Saves an image to the database.
+     * Saves a tag to the database.
      *
-     * @param Tag $tag
-     * @return integer The ID of the newly saved tag.
+     * @param Tag $tag The tag object to be saved.
+     * 
+     * @return int The ID of the newly saved tag.
      */
     public function store(Tag $tag): int
     {
@@ -458,10 +471,11 @@ class TagStorage
     }
 
     /**
-     * Deletes an image from the database based on the supplied image.
+     * Deletes a tag from the database based on the supplied tag.
      *
-     * @param Tag $tag
-     * @return boolean
+     * @param Tag $tag The tag object to be deleted.
+     * 
+     * @return bool True on success, false on failure.
      */
     public function delete(Tag $tag): bool
     {

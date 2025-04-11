@@ -3,12 +3,12 @@
 namespace Gallery\Storage;
 
 use PDO;
-use PDOException;
 use Gallery\Core\DatabaseConnection;
 use Gallery\Structure\Image;
 
 /**
  * ImageStorage Class
+ * 
  * This class is responsible for managing image storage in the database.
  */
 class ImageStorage
@@ -18,13 +18,14 @@ class ImageStorage
     private const string TAGS_TABLE = 'image_tags';
 
     // Main Class Object Constant
-    private const OBJ_CLASS = Image::class;
+    private const string OBJ_CLASS = Image::class;
 
     // Database Connection
     private PDO $db;
 
     /**
      * Class constructor
+     * 
      * Initializes the Database Connection.
      */
     public function __construct()
@@ -37,8 +38,9 @@ class ImageStorage
     /**
      * Retrieves an image or an array of images from the database.
      *
-     * @param integer|null $image_id
-     * @return Image|array
+     * @param int|null $image_id Optional. The ID of the image to retrieve. If null, retrieves all images.
+     * 
+     * @return Image|Image[] An Image object if $image_id is provided, otherwise an array of Image objects.
      */
     public function retrieve(?int $image_id = null): Image|array
     {
@@ -80,8 +82,9 @@ class ImageStorage
     /**
      * Get image based on supplied file name.
      *
-     * @param string $file_name
-     * @return Image|null
+     * @param string $file_name The file name of the image to retrieve.
+     * 
+     * @return Image|null An Image object if found, otherwise null.
      */
     public function retrieveByFilename(string $file_name): ?Image
     {
@@ -117,8 +120,11 @@ class ImageStorage
     /**
      * Returns an array of images based on the supplied tag ids.
      *
-     * @param array $tag_ids
-     * @return array
+     * @param array $tag_ids The array of tag IDs to search for.
+     * @param int $page_number The page number to retrieve.
+     * @param int $items_per_page The number of items per page.
+     * 
+     * @return Image[] An array of Image objects.
      */
     public function retrieveWithTags(array $tag_ids, int $page_number, int $items_per_page): array
     {
@@ -165,11 +171,12 @@ class ImageStorage
     /**
      * Retrieves a number of images based on the supplied page number and the number of images per page.
      *
-     * @param integer $page_number - The page number to retrieve.
-     * @param integer $items_per_page - The number of items per page.
-     * @return array
+     * @param integer $page_number The page number to retrieve.
+     * @param integer $items_per_page The number of items per page.
+     * 
+     * @return Image[] An array of Image objects.
      */
-    public function retrieveForPage(int $page_number, int $items_per_page = 40): array
+    public function retrieveForPage(int $page_number, int $items_per_page): array
     {
         // Initialize Images
         $images = [];
@@ -203,7 +210,7 @@ class ImageStorage
     /**
      * Gets the total number of images in the database.
      *
-     * @return integer
+     * @return integer The total number of images in the database.
      */
     public function retrieveTotalImageCount(): int
     {
@@ -232,8 +239,10 @@ class ImageStorage
 
     /**
      * Gets the total number of images in the database with specific tags.
+     * 
+     * @param array $tag_ids The array of tag IDs to search for.
      *
-     * @return integer
+     * @return int The total number of images with the specified tags.
      */
     public function retrieveTotalImageWithTagsCount(array $tag_ids): int
     {
@@ -272,10 +281,11 @@ class ImageStorage
 
     /**
      * Check if an image exists in the database based on file name or md5 hash.
-     * @param string $file_name 
-     * @param string $hash 
-     * @return bool 
-     * @throws PDOException 
+     * 
+     * @param string $file_name The file name of the image to check.
+     * @param string $hash The md5 hash of the image to check. 
+     * 
+     * @return bool True if the image exists, false otherwise. 
      */
     public function imageExistsInDatabase(string $file_name, string $hash): bool
     {
@@ -307,8 +317,9 @@ class ImageStorage
     /**
      * Saves an image to the database.
      *
-     * @param Image $image
-     * @return integer
+     * @param Image $image The image object to save.
+     * 
+     * @return int The ID of the newly saved image.
      */
     public function store(Image $image): int
     {
@@ -340,8 +351,9 @@ class ImageStorage
     /**
      * Deletes an image from the database based on the supplied image.
      *
-     * @param Image $image
-     * @return boolean
+     * @param Image $image The image object to delete.
+     * 
+     * @return bool True if the image was deleted, false otherwise.
      */
     public function delete(Image $image): bool
     {

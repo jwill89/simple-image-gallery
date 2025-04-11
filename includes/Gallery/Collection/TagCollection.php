@@ -32,7 +32,7 @@ class TagCollection
      * get function
      * Gets an tag based on supplied tag ID.
      * 
-     * @param integer $tag_id
+     * @param int $tag_id
      * @return Tag|null
      */
     public function get(int $tag_id): ?Tag
@@ -109,7 +109,7 @@ class TagCollection
      * totalTags function
      * Gets the total number of tags in the database.
      *
-     * @return integer
+     * @return int
      */
     public function totalTags(): int
     {
@@ -122,7 +122,7 @@ class TagCollection
      *
      * @param Image $image
      * @param Tag $tag
-     * @return boolean
+     * @return bool
      */
     public function addTagsToImage(Image $image, array $tag_ids): bool
     {
@@ -135,7 +135,7 @@ class TagCollection
      *
      * @param Video $video
      * @param Tag $tag
-     * @return boolean
+     * @return bool
      */
     public function addTagsToVideo(Video $video, array $tag_ids): bool
     {
@@ -148,7 +148,7 @@ class TagCollection
      *
      * @param Image $image
      * @param Tag $tag
-     * @return boolean
+     * @return bool
      */
     public function removeTagFromImage(Image $image, Tag $tag): bool
     {

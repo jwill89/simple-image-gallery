@@ -3,7 +3,6 @@
 namespace Gallery\Storage;
 
 use PDO;
-use PDOException;
 use Gallery\Core\DatabaseConnection;
 use Gallery\Structure\Video;
 
@@ -18,7 +17,7 @@ class VideoStorage
     private const string TAGS_TABLE = 'videos_tags';
 
     // Main Class Object Constant
-    private const OBJ_CLASS = Video::class;
+    private const string OBJ_CLASS = Video::class;
 
     // Database Connection
     private PDO $db;
@@ -37,8 +36,9 @@ class VideoStorage
     /**
      * Retrieves a video or an array of videos from the database.
      *
-     * @param integer|null $video_id
-     * @return Video|array
+     * @param int|null $video_id The ID of the video to retrieve. If null, retrieves all videos.
+     * 
+     * @return Video|Video[] An array of Video objects or a single Video object if an ID is provided.
      */
     public function retrieve(?int $video_id = null): Video|array
     {
@@ -80,8 +80,9 @@ class VideoStorage
     /**
      * Get video based on supplied file name.
      *
-     * @param string $file_name
-     * @return Video|null
+     * @param string $file_name The file name of the video to retrieve.
+     * 
+     * @return Video|null Returns a Video object if found, null otherwise.
      */
     public function retrieveByFilename(string $file_name): ?Video
     {
@@ -117,16 +118,22 @@ class VideoStorage
     /**
      * Returns an array of videos based on the supplied tag ids.
      *
-     * @param array $tag_ids
-     * @return array
+     * @param array $tag_ids The tag IDs to filter videos by.
+     * @param int $page_number The page number to retrieve.
+     * @param int $items_per_page The number of items per page.
+     * 
+     * @return Video[] An array of Video objects.
      */
-    public function retrieveWithTags(array $tag_ids): array
+    public function retrieveWithTags(array $tag_ids, int $page_number, int $items_per_page): array
     {
         // Initialize Videos
-        $images = [];
+        $videos = [];
 
         // Count the number of tags
         $tag_count = count($tag_ids);
+
+        // Calculate the offset for pagination
+        $offset = ($page_number - 1) * $items_per_page;
 
         // Setup the Query
         $sql = "SELECT vid.* FROM " . self::MAIN_TABLE . " vid
@@ -135,25 +142,28 @@ class VideoStorage
                     WHERE tag.tag_id IN (" . implode(',', $tag_ids) . ")
                     GROUP BY vid.video_id 
                     HAVING COUNT(DISTINCT tag.tag_id) = :tag_count
-                    ORDER BY vid.video_id DESC";
+                    ORDER BY vid.video_id DESC
+                    LIMIT :limit OFFSET :offset";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
 
         // If prepared successfully
         if ($stmt) {
-            // Bind the tag count to the query
+            // Bind the parameters to the query
             $stmt->bindParam(':tag_count', $tag_count, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
             // Try executing
             if ($stmt->execute()) {
-                $images = $stmt->fetchAll(PDO::FETCH_CLASS, self::OBJ_CLASS);
+                $videos = $stmt->fetchAll(PDO::FETCH_CLASS, self::OBJ_CLASS);
             }
 
             $stmt->closeCursor();
         }
 
-        return $images;
+        return $videos;
     }
 
     /**
@@ -161,7 +171,8 @@ class VideoStorage
      *
      * @param integer $page_number - The page number to retrieve.
      * @param integer $items_per_page - The number of items per page.
-     * @return array
+     * 
+     * @return Video[] An array of Video objects.
      */
     public function retrieveForPage(int $page_number, int $items_per_page): array
     {
@@ -197,7 +208,7 @@ class VideoStorage
     /**
      * Gets the total number of videos in the database.
      *
-     * @return integer
+     * @return int The total number of videos in the database.
      */
     public function retrieveTotalVideoCount(): int
     {
@@ -227,7 +238,8 @@ class VideoStorage
      * Gets the total number of videos with specific tags in the database.
      *
      * @param array $tag_ids - The tag IDs to filter videos by.
-     * @return integer
+     * 
+     * @return int The total number of videos with the specified tags.
      */
     public function retrieveTotalVideoWithTagsCount(array $tag_ids): int
     {
@@ -266,9 +278,10 @@ class VideoStorage
 
     /**
      * Check if a video exists in the database based on file name.
-     * @param string $file_name 
-     * @return bool 
-     * @throws PDOException 
+     * 
+     * @param string $file_name The file name of the video to check.
+     * 
+     * @return bool Returns true if the video exists, false otherwise.
      */
     public function videoExistsInDatabase(string $file_name): bool
     {
@@ -299,8 +312,9 @@ class VideoStorage
     /**
      * Saves a video to the database.
      *
-     * @param Video $video
-     * @return integer
+     * @param Video $video The video object to store.
+     * 
+     * @return int The ID of the stored video
      */
     public function store(Video $video): int
     {
@@ -331,8 +345,9 @@ class VideoStorage
     /**
      * Deletes a video from the database based on the supplied video.
      *
-     * @param Video $video
-     * @return boolean
+     * @param Video $video The video object to delete.
+     * 
+     * @return bool True if the video was deleted, false otherwise.
      */
     public function delete(Video $video): bool
     {
