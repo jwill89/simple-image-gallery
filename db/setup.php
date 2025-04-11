@@ -95,6 +95,7 @@ if (!$db_exists) {
     CREATE TABLE IF NOT EXISTS "tag_categories" (
         "category_id"	INTEGER NOT NULL,
         "category_name"	TEXT NOT NULL UNIQUE COLLATE NOCASE,
+        "category_short"	TEXT NOT NULL UNIQUE COLLATE NOCASE,
         PRIMARY KEY("category_id" AUTOINCREMENT)
     )
     SQL;
@@ -122,12 +123,12 @@ if (!$db_exists) {
 
     // Setup the SQL for the table creation
     $sql = <<<SQL
-    INSERT INTO "tag_categories" ("category_id", "category_name") 
-        VALUES (1, 'General'),
-               (2, 'Artist'),
-               (3, 'Series'),
-               (4, 'Character'),
-               (5, 'Personal List')
+    INSERT INTO "tag_categories" ("category_id", "category_name", "category_short") 
+        VALUES (1, 'General', 'g'),
+               (2, 'Artist', 'a'),
+               (3, 'Character', 'c'),
+               (4, 'Source', 's'),
+               (5, 'Personal List', 'p')
     SQL;
 
     // Execute SQL
