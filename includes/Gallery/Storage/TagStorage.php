@@ -4,7 +4,9 @@ namespace Gallery\Storage;
 
 use PDO;
 use Gallery\Core\DatabaseConnection;
+use Gallery\Collection\TagCategoryCollection;
 use Gallery\Structure\Tag;
+use Gallery\Structure\TagCategory;
 use Gallery\Structure\Image;
 use Gallery\Structure\Video;
 
@@ -135,8 +137,21 @@ class TagStorage
      */
     public function retrieveOrCreate(string $tag_name): Tag
     {
-        // Check if we have a tag
-        $tag_exists = $this->retrieveByName($tag_name);
+        // First, split the tag name to see if a category shortcode was used.
+        if (strpos($tag_name, ':') !== false) {
+            // Split the tag name into category shortcode and actual tag name
+            [$category_shortcode, $name] = array_map('trim', explode(':', $tag_name, 2));
+
+            // Get a category repository and check for a valid category shortcode
+            $category_repo = new TagCategoryCollection();
+            $category = $category_repo->getByShortcode($category_shortcode);
+            var_dump($category_shortcode, $name, $category); // Debugging line
+        } else {
+            $category = null;
+        }
+
+        // Check if we have a tag using the name based on if the category shortcode was valid
+        $tag_exists = ($category instanceof TagCategory) ? $this->retrieveByName($name) : $this->retrieveByName($tag_name);
 
         // If we got a tag, return the tag
         if ($tag_exists instanceof Tag) {
@@ -145,7 +160,15 @@ class TagStorage
 
         // If we failed to get a tag, create one and save it.
         $tag = new Tag();
-        $tag->setTagName($tag_name);
+
+        // If we had a valid category shortcode, set the category ID and name
+        if ($category instanceof TagCategory) {
+            $tag->setTagName($name)
+            ->setCategoryId($category->getCategoryId());
+        } else {
+            $tag->setTagName($tag_name)
+            ->setCategoryId(1);
+        }
 
         // Save the tag
         $tag_id = $this->store($tag);
@@ -450,13 +473,15 @@ class TagStorage
     {
         // Check if already exists
         if (empty($tag->getTagId())) {
-            $sql = "INSERT INTO " . self::MAIN_TABLE . " (tag_name) VALUES (:tag_name)";
+            $sql = "INSERT INTO " . self::MAIN_TABLE . " (category_id, tag_name) VALUES (:category_id, :tag_name)";
 
             // Prepare statement
             $stmt = $this->db->prepare($sql);
 
-            // Bind parameters
+            // If the statement was prepared successfully
             if ($stmt) {
+                // Bind parameters
+                $stmt->bindValue(':category_id', $tag->getCategoryId(), PDO::PARAM_INT);
                 $stmt->bindValue(':tag_name', $tag->getTagName(), PDO::PARAM_STR);
 
                 // Execute statement
