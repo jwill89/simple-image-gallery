@@ -141,12 +141,73 @@
                                 <button class="button is-primary" id="add-tags">Add Tags</button>
                             </div>
                         </div>
-                        <p class="help">Add tags. Multiple tag should be separate by a comma. If a tag does not exist, it will be created.</p>
+                        <p class="help">
+                            Add tags. Multiple tag should be separate by a comma. If a tag does not exist, it will be created.<br/>
+                            Use the appropriate <a id="help-shortcode">shortcodes</a> before tags to ensure they are added to the appropriate categories.
+                        </p>
                     </div>
                     <div class="tags are-medium" id="tag-list">
                     </div>
                 </div>
             </div>
+            <!-- Tags Help Modal -->
+            <div class="modal" id="help-modal-shortcodes">
+                <div class="modal-background"></div>
+                    <div class="modal-card">
+                        <header class="modal-card-head">
+                          <p class="modal-card-title"><strong>Tag Help</strong></p>
+                          <button class="delete modal-delete is-large" aria-label="close"></button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                                <h4>Tag Categories</h4>
+                                <p>Tags have five categories they belong to, each having a different color when added they appear in an item's tag list. When you add
+                                    a tag, you can add a shortcode followed by a colon before the tag to ensure it is added to the appropriate category. The shortcodes are as follows:</p>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Tag</th>
+                                            <th>Shortcode</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="tag is-white">General</span></td>
+                                            <td><code>g:</code></td>
+                                            <td>General terms that describe features of the image or video. This is the default if no shortcode is used.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="tag is-danger">Artist</span></td>
+                                            <td><code>a:</code></td>
+                                            <td>The artist of the work. This is <strong>not</strong> the artist of the original work the characters might
+                                                belong to, but the name or alias of the person who created this specific piece.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="tag is-success">Character</span></td>
+                                            <td><code>c:</code></td>
+                                            <td>The name of a character in the image or video. We use a "&lt;First Name&gt; &lt;Last Name&gt;"
+                                                format for characters with a first and last name. For example, "Kurosaki Ichigo" would be <code>c:Ichigo Kurosaki</code>. If the character is known by a single name,
+                                                such as "Goku", then it would be <code>c:Goku</code>.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="tag is-warning">Source</span></td>
+                                            <td><code>s:</code></td>
+                                            <td>The source material of the characters in the piece. This could be a movie, video game, anime, manga,
+                                                manhwa, etc. For works in foreign languages with non-roman characters, please use the romanization of the title.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="tag is-info">Personal List</span></td>
+                                            <td><code>p:</code></td>
+                                            <td>These are personal lists that may be created for individuals to record their favorite pieces.
+                                                We dissuade the use of these in favor of saving your favorite list of tags.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+              </div>
         </div>
     </section>
     <!-- Image/Video Tags Section END -->
