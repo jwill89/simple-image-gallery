@@ -103,8 +103,8 @@ class TagController extends AbstractController
 
     /**
      * getTagListForDisplay function
-     * This function is used to get all tags, sorted alphabetically and put into a
-     * json response to display on the tag listing page.
+     * This function is used to get all tags, along with their category and usage counts
+     * on images and videos for the tag list page table.
      *
      * @param Request $request
      * @param Response $response
@@ -120,7 +120,7 @@ class TagController extends AbstractController
         $data = [];
 
         // Get all tags
-        $data = $this->tag_collection->getAll();
+        $data = $this->tag_collection->getAllForPage();
 
         // Return data as json with HTTP status response
         return $response->withJson($data, $status);

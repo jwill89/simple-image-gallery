@@ -23,6 +23,7 @@ class TagStorage
     private const string MAIN_TABLE = 'tags';
     private const string IMAGE_TAG_TABLE = 'image_tags';
     private const string VIDEO_TAG_TABLE = 'video_tags';
+    private const string CATEGORIES_TABLE = 'tag_categories';
 
     // Main Class Object Constant
     private const string OBJ_CLASS = Tag::class;
@@ -137,6 +138,9 @@ class TagStorage
      */
     public function retrieveOrCreate(string $tag_name): Tag
     {
+        // Tags and shortcodes are all lowercase
+        $tag_name = strtolower($tag_name);
+        
         // First, split the tag name to see if a category shortcode was used.
         if (strpos($tag_name, ':') !== false) {
             // Split the tag name into category shortcode and actual tag name
@@ -248,6 +252,39 @@ class TagStorage
         }
 
         return $tags;
+    }
+
+    /**
+     * Get all tags with category and usage counts for the tags page.
+     *
+     * @return array
+     */
+    public function retrieveAllTagsForPage(): array
+    {
+        // Initialize Tag Data
+        $tag_data = [];
+
+        // Setup the Query
+        $sql = "SELECT t.tag_name, tc.category_name,
+                (SELECT COUNT(*) FROM " . self::IMAGE_TAG_TABLE . " it WHERE it.tag_id = t.tag_id) AS image_count,
+                (SELECT COUNT(*) FROM " . self::VIDEO_TAG_TABLE . " vt WHERE vt.tag_id = t.tag_id) AS video_count
+             FROM " . self::MAIN_TABLE . " t LEFT JOIN " . self::CATEGORIES_TABLE . " tc USING (category_id) ORDER BY t.category_id ASC, t.tag_name ASC";
+
+        // Prepare statement
+        $stmt = $this->db->prepare($sql);
+
+        // If prepared successfully
+        if ($stmt) {
+            // Try executing
+            if ($stmt->execute()) {
+                // Fetch results
+                $tag_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+            
+            $stmt->closeCursor();
+        }
+
+        return $tag_data;
     }
 
     /**

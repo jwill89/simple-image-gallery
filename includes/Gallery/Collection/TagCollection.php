@@ -60,6 +60,7 @@ class TagCollection
     }
 
    /**
+    * getOrCreate function
     * Retrieves a tag if it exists or creates one and returns it if it doesn't.
     *
     * @param string $tag_name
@@ -74,11 +75,22 @@ class TagCollection
      * getAll function
      * Gets all tags.
      *
-     * @return array
+     * @return Tag[]
      */
     public function getAll(): array
     {
         return $this->storage->retrieve();
+    }
+
+    /**
+     * getAllForPage function
+     * Gets all tags for a given page.
+     *
+     * @return array
+     */
+    public function getAllForPage(): array
+    {
+        return $this->storage->retrieveAllTagsForPage();
     }
 
     /**
