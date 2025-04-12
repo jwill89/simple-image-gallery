@@ -37,6 +37,9 @@ $(function () {
     // Site Initialization
     SiteInit();
 
+    // Bind Site Events
+    AddEventListenersToSite();
+
     // Bind Element Events
     AddEventListenersNavigation();
 
@@ -59,10 +62,7 @@ function SiteInit() {
     });
 
     // Load all current tags
-    getTags().then((tags) => {
-        ALL_TAGS = tags;
-        setTagList(ALL_TAGS);
-    });
+    RefreshTags();
 
     // Set total images in footer
     getTotalImages().then((total) => {
@@ -421,7 +421,29 @@ function RenderPageMediaTags(itemID) {
         // Add the Tags
         tags.forEach((tag) => {
             const tagSpan = document.createElement('span');
-            tagSpan.classList.add('tag', 'is-info');
+            tagSpan.classList.add('tag');
+            let categoryClass;
+            switch (tag.category_id) {
+                case 1:
+                    categoryClass = 'is-white';
+                    break;
+                case 2:
+                    categoryClass = 'is-danger';
+                    break;
+                case 3:
+                    categoryClass = 'is-success';
+                    break;
+                case 4:
+                    categoryClass = 'is-warning';
+                    break;
+                case 5:
+                    categoryClass = 'is-info';
+                    break;
+                default:
+                    categoryClass = 'is-white';
+                    break;
+            }
+            tagSpan.classList.add(categoryClass);
             tagSpan.innerHTML = tag.tag_name;
             const tagDeleteButton = document.createElement('button');
             tagDeleteButton.classList.add('delete');
@@ -447,6 +469,21 @@ function RenderPageTags() {
 }
 
 /**
+ * @function ClearPageMediaTags
+ * @description Clears the content of the media tags page and shows the gallery.
+ */
+function ClearPageMediaTags() {
+    // Clear Image Source
+    $('#tag-image').prop('src', '');
+    // Clear Tags
+    $('#tag-list').empty();
+    // Hide the Tag Page
+    $('#item-tags-content').addClass('is-hidden');
+    // Show the Gallery
+    $('#gallery-content').removeClass('is-hidden');
+}
+
+/**
  * @function NavigationSetActive
  * @description Sets the appropriate link as active in the navigation bar.
  * @param {HTMLElement} activeLink 
@@ -454,6 +491,34 @@ function RenderPageTags() {
 function NavigationSetActive(activeLink) {
     $('a.navbar-item').removeClass('is-selected');
     activeLink.addClass('is-selected');
+}
+
+/**
+ * @function AddEventListenersToSite
+ * @description Binds site-wide listeners to their needed elements
+ */
+function AddEventListenersToSite() {
+    // Close All Modals - Buttons
+    $('.modal-close').on('click', function () {
+        CloseModal();
+    });
+
+    // Close All Modals - Buttons
+    $('.modal-delete').on('click', function () {
+        CloseModal();
+    });
+
+    // Close Modal - Background
+    $('.modal-background').on('click', function () {
+        CloseModal();
+    });
+
+    // Close Modal - Escape Key
+    $(document).on('keyup', function (event) {
+        if (event.key === 'Escape') {
+            CloseModal();
+        }
+    });
 }
 
 /**
@@ -469,23 +534,21 @@ function AddEventListenersNavigation() {
 
     // Main Links - Images
     $('#nav-images-link').on('click', function () {
-        if (PAGE_TYPE !== PAGE_IMAGES) {
-            CURRENT_PAGE = 1;
-        }
+        CURRENT_PAGE = 1;
         PAGE_TYPE = PAGE_IMAGES;
         CURRENT_TAGS = [];
         NavigationSetActive($(this));
+        ClearPageMediaTags();
         RenderPageGallery();
     });
 
     // Main Links - Videos
     $('#nav-videos-link').on('click', function () {
-        if (PAGE_TYPE !== PAGE_VIDEOS) {
-            CURRENT_PAGE = 1;
-        }
+        CURRENT_PAGE = 1;
         PAGE_TYPE = PAGE_VIDEOS;
         CURRENT_TAGS = [];
         NavigationSetActive($(this));
+        ClearPageMediaTags();
         RenderPageGallery();
     });
 
@@ -493,6 +556,7 @@ function AddEventListenersNavigation() {
     $('#nav-tags-link').on('click', function () {
         PAGE_TYPE = PAGE_TAGS;
         CURRENT_TAGS = [];
+        ClearPageMediaTags();
         RenderPageTags();
     });
 
@@ -586,14 +650,12 @@ function AddEventListenersGalleryPagination() {
 function AddEventListenersMediaTags() {
     // Tag Back - Back to Gallery
     $('#back-to-gallery').on('click', function () {
-        // Clear Image Source
-        $('#tag-image').prop('src', '');
-        // Clear Tags
-        $('#tag-list').empty();
-        // Hide the Tag Page
-        $('#item-tags-content').addClass('is-hidden');
-        // Show the Gallery
-        $('#gallery-content').removeClass('is-hidden');
+        ClearPageMediaTags();
+    });
+
+    // Tag Category Shortcode Help Modal
+    $('#help-shortcode').on('click', function () {
+        OpenModal('help-modal-shortcodes');
     });
 
     // Add Tags to Item
@@ -603,11 +665,57 @@ function AddEventListenersMediaTags() {
         const itemID = $('#tag-image').data('id');
 
         addTagsToItem(itemID, tags).then(() => {
+            // Clear existing tags
+            $('#tag-list').empty();
+
+            // Get the new tags
             RenderPageMediaTags(itemID);
+
+            // Refresh Tag List Globally in case of new tags
+            RefreshTags();
         });
 
         // Clear Tags Input
         tagsInput.val('');
+    });
+}
+
+/**
+ * @function OpenModal
+ * @description Opens a modal with the specified name.
+ * @param {string} modalID 
+ */
+function OpenModal(modalID) {
+    const modal = $(`#${modalID}`);
+    modal.addClass('is-active');
+}
+
+/**
+ * @function CloseModal
+ * @description Opens a modal with the specified name.
+ * @param {string} modalID 
+ */
+function CloseModal(modalID = null) {
+    let modal, modals;
+    if (modalID !== null) {
+        modal = $(`#${modalID}`);
+        modal.removeClass('is-active');
+    } else {
+        modals = $('.modal');
+        modals.each(function () {
+            $(this).removeClass('is-active');
+        });
+    }
+}
+
+/**
+ * @function RefreshTags
+ * @description Refreshes the tags by fetching them from the API and updating the tag list.
+ */
+function RefreshTags() {
+    getTags().then((tags) => {
+        ALL_TAGS = tags;
+        setTagList(ALL_TAGS);
     });
 }
 
@@ -632,9 +740,9 @@ function setPageTitle() {
 /**
  * @function setTagList
  * @description Sets the tag list for the datalist elements.
- * @param {Array} currentTags 
+ * @param {Array} tagsList 
  */
-function setTagList(currentTags) {
+function setTagList(tagsList) {
     const tagLists = $('.datalist-for-tags');
 
     // Setup the Tag Lists
@@ -643,7 +751,7 @@ function setTagList(currentTags) {
         $(this).empty();
 
         // Add the Tags
-        currentTags.forEach(tag => {
+        tagsList.forEach(tag => {
             const datalistOption = document.createElement('option');
             datalistOption.setAttribute('value', tag.tag_name);
             $(this).append(datalistOption);
