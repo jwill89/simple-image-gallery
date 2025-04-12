@@ -6,6 +6,8 @@
  * @description This file contains the JavaScript code for the site. It handles the loading of images and videos, pagination, and tag management.
  */
 
+// For Linting
+/* global DataTable */
 
 /**
  * @const {number} PAGE_IMAGES - Defines if the page is displaying images
@@ -119,16 +121,19 @@ function RenderPageGallery() {
 
             let item_id,
                 thumbnail_path,
-                full_path;
+                full_path,
+                hash;
 
             if (PAGE_TYPE === PAGE_IMAGES) {
                 item_id = item.image_id;
                 thumbnail_path = "images/thumbs/" + item.file_name;
                 full_path = "images/full/" + item.file_name;
+                hash = item.hash;
             } else if (PAGE_TYPE === PAGE_VIDEOS) {
                 item_id = item.video_id;
                 thumbnail_path = "videos/thumbs/" + item.file_name.split('.').slice(0, -1).join('.') + ".jpg";
                 full_path = "videos/full/" + item.file_name;
+                hash = item.hash
             }
 
             // Flex Div
@@ -196,6 +201,7 @@ function RenderPageGallery() {
             const cardFooterLinkTags = document.createElement('a');
             cardFooterLinkTags.classList.add('card-footer-item', 'link-tags-page');
             cardFooterLinkTags.setAttribute('data-id', item_id);
+            cardFooterLinkTags.setAttribute('data-hash', hash);
 
             // Card Footer - Link - Tags - Span
             const cardFooterLinkTagsSpan = document.createElement('span');
@@ -249,8 +255,12 @@ function RenderPageGallery() {
  * @description Generates the pagination for the gallery based on the current page and type (images or videos).
  */
 function RenderGalleryPagination() {
-    const topDiv = $('#pagination-top');
-    const bottomDiv = $('#pagination-bottom');
+    // Define the Page Section
+    const gallerySection = $('#gallery-content');
+
+    // Define the Pagination Divs
+    const topPagination = $('#pagination-top');
+    const bottomPagination = $('#pagination-bottom');
     let pagesPromise;
 
     if (PAGE_TYPE === PAGE_IMAGES) {
@@ -342,7 +352,7 @@ function RenderGalleryPagination() {
         listItemPageLastLink.innerHTML = TotalPages;
         listItemPageLast.appendChild(listItemPageLastLink);
 
-        // BUild Pagination
+        // Build Pagination
         paginationTop.appendChild(previousLink);
         paginationTop.appendChild(nextLink);
         paginationTop.appendChild(pageNumberList);
@@ -379,25 +389,35 @@ function RenderGalleryPagination() {
         const paginationBottom = paginationTop.cloneNode(true);
 
         // Check to see if we have the elements
-        topDiv.empty().append(paginationTop);
-        bottomDiv.empty().append(paginationBottom);
+        topPagination.empty().append(paginationTop);
+        bottomPagination.empty().append(paginationBottom);
 
         // Bind Pagination Links
         AddEventListenersGalleryPagination();
+
+        // Bind Gallery Links
+        AddEventListenersGallery();
+
+        // Show the Page
+        gallerySection.removeClass('is-hidden');
     });
 }
 
 /**
  * @function RenderPageMediaTags
  * @description Generates the content for the tag page for an image or video.
- * @param {number} itemID 
+ * @param {number} itemID
+ * @param {string} itemURL
+ * @param {string} itemHash
  */
-function RenderPageMediaTags(itemID) {
+function RenderPageMediaTags(itemID, itemURL, itemHash = null) {
+    // Define the Page Section
+    const mediaTagsSection = $('#item-tags-content');
+    
      // Get Tags for Item
      getTagsForItem(itemID).then((tags) => {
         const mediaContainer = $('#tags-page-media');
-        const mediaURL = $(`#item-full-${itemID}`).prop('href');
-        const mediaExtension = mediaURL.split('.').pop().toLowerCase();
+        const mediaExtension = itemURL.split('.').pop().toLowerCase();
 
         // If the Item is an Image or GIF
         if (PAGE_TYPE === PAGE_IMAGES || mediaExtension === 'gif') {
@@ -405,7 +425,7 @@ function RenderPageMediaTags(itemID) {
             mediaItem.setAttribute('id', 'tag-image');
             mediaItem.setAttribute('data-id', itemID);
             mediaItem.setAttribute('alt', '');
-            mediaItem.setAttribute('src', mediaURL);
+            mediaItem.setAttribute('src', itemURL);
             mediaContainer.empty().append(mediaItem);
         // If the Item is a Video
         } else {
@@ -413,9 +433,18 @@ function RenderPageMediaTags(itemID) {
             mediaItem.setAttribute('id', 'tag-video');
             mediaItem.setAttribute('data-id', itemID);
             mediaItem.setAttribute('controls', 'controls');
-            mediaItem.setAttribute('src', mediaURL);
+            mediaItem.setAttribute('src', itemURL);
             mediaItem.setAttribute('type', 'video/' + mediaExtension);
             mediaContainer.empty().append(mediaItem);
+        }
+
+        // Get the MD5 Hash
+        if (itemHash !== null) {
+            const hashDisplay = document.createElement('p');
+            hashDisplay.classList.add('help');
+            hashDisplay.setAttribute('id', 'hash-display');
+            hashDisplay.innerHTML = `MD5 Hash: ${itemHash}`;
+            mediaContainer.append(hashDisplay);
         }
         
         // Add the Tags
@@ -454,33 +483,167 @@ function RenderPageMediaTags(itemID) {
         });
 
         // Show the Tag Page
-        $('#item-tags-content').removeClass('is-hidden');
-        $('#gallery-content').addClass('is-hidden');
+        mediaTagsSection.removeClass('is-hidden');
     });
 }
 
 /**
  * @function RenderPageTags
- * @description Generates the content for the tags page.
- * @todo Implement the RenderPageTags function
+ * @description Generates the content for the tags page including rendering the Datatable.
  */
 function RenderPageTags() {
-    // TODO: Implement the RenderPageTags function
+    // Define the Page Section
+    const tagsSection = $('#tags-list-content');
+
+    // Update the Page Title
+    setPageTitle();
+
+    // Get the Table
+    const tagsSectionTable = $('#tag-list-page-table');
+
+    // Set up the Tags Page Datatable
+    tagsSectionTable.DataTable({
+        ajax: {
+            url: `${API_BASE_URL}/tags/display/`,
+            dataSrc: ''
+        },
+        destroy: true,
+        processing: true,
+        searching: true,
+        autowidth: true,
+        paging: true,
+        scrollCollapse: true,
+        colReorder: true,
+        fixedHeader: true,
+        responsive: true,
+        lengthMenu: [10, 25, 50, 100],
+        pageLength: 10,
+        columns: [
+            {
+                // Tag Name
+                name: 'tag_name',
+                data: 'tag_name',
+                visible: true,
+                searchable: true,
+                render: function (data, type, row) {
+                    let categoryClass = '';
+                    switch (row.category_name) {
+                        case 'General':
+                            categoryClass = 'has-text-white';
+                            break;
+                        case 'Artist':
+                            categoryClass = 'has-text-danger';
+                            break;
+                        case 'Character':
+                            categoryClass = 'has-text-success';
+                            break;
+                        case 'Series':
+                            categoryClass = 'has-text-warning';
+                            break;
+                        case 'Personal List':
+                            categoryClass = 'has-text-info';
+                            break;
+                        default:
+                            categoryClass = 'has-text-white';
+                            break;
+                    }
+                    return `<span class="${categoryClass}">${data}</span>`;
+                }
+             },
+            {
+                name: 'category_name',
+                data: 'category_name',
+                visible: true,
+                searchable: true,
+                render: function (data) {
+                    let categoryClass = '';
+                    switch (data) {
+                        case 'General':
+                            categoryClass = 'is-white';
+                            break;
+                        case 'Artist':
+                            categoryClass = 'is-danger';
+                            break;
+                        case 'Character':
+                            categoryClass = 'is-success';
+                            break;
+                        case 'Series':
+                            categoryClass = 'is-warning';
+                            break;
+                        case 'Personal List':
+                            categoryClass = 'is-info';
+                            break;
+                        default:
+                            categoryClass = 'is-white';
+                            break;
+                    }
+                    return `<span class="tag is-medium ${categoryClass}">${data}</span>`;
+                }
+            },
+            {   name: 'image_count',
+                data: 'image_count',
+                visible: true,
+                searchable: true,
+                render: function (data) {
+                    return `<p class="has-text-center">${data}</p>`;
+                }
+            },
+            {   
+                name: 'video_count',
+                data: 'video_count',
+                visible: true,
+                searchable: true,
+                render: function (data) {
+                    return `<p class="has-text-center">${data}</p>`;
+                }
+            }
+        ]
+    });
+
+    // Show the Tags Section
+    tagsSection.removeClass('is-hidden');
 }
 
 /**
- * @function ClearPageMediaTags
- * @description Clears the content of the media tags page and shows the gallery.
+ * @function ClearPages
+ * @description Clears the content of all pages and hides them. Individual page render functions will show their pages
  */
-function ClearPageMediaTags() {
-    // Clear Image Source
-    $('#tag-image').prop('src', '');
-    // Clear Tags
-    $('#tag-list').empty();
-    // Hide the Tag Page
-    $('#item-tags-content').addClass('is-hidden');
-    // Show the Gallery
-    $('#gallery-content').removeClass('is-hidden');
+function ClearPages() {
+    // Gallery Page
+    const gallerySection = $('#gallery-content');
+    const gallerySectionTopPagination = $('#pagination-top');
+    const gallerySectionBottomPagination = $('#pagination-bottom');
+    const gallerySectionContent = $('#gallery-display');
+
+    // Media Item Tags Page
+    const mediaTagsSection = $('#item-tags-content');
+    const mediaTagsSectionMediaItem = $('#tags-page-media');
+    const mediaTagsSectionTags = $('#tag-list');
+
+    // Tag List Page
+    const tagsSection = $('#tags-list-content');
+    const tagsSectionTable = $('#tag-list-page-table');
+    const tagsSectionTableBody = $('#tag-list-page-table-body');
+
+    // Clear the Gallery Page
+    gallerySectionTopPagination.empty();
+    gallerySectionBottomPagination.empty();
+    gallerySectionContent.empty();
+
+    // Clear the Media Item Tags Page
+    mediaTagsSectionMediaItem.empty();
+    mediaTagsSectionTags.empty();
+
+    // Clear the Tag List Page & Datatable
+    if (DataTable.isDataTable('#tag-list-page-table')) {
+        tagsSectionTable.DataTable().clear().destroy();
+        tagsSectionTableBody.empty();
+    }
+
+    // Hide All Pages (Sections)
+    gallerySection.addClass('is-hidden');
+    mediaTagsSection.addClass('is-hidden');
+    tagsSection.addClass('is-hidden');
 }
 
 /**
@@ -538,7 +701,7 @@ function AddEventListenersNavigation() {
         PAGE_TYPE = PAGE_IMAGES;
         CURRENT_TAGS = [];
         NavigationSetActive($(this));
-        ClearPageMediaTags();
+        ClearPages();
         RenderPageGallery();
     });
 
@@ -548,7 +711,7 @@ function AddEventListenersNavigation() {
         PAGE_TYPE = PAGE_VIDEOS;
         CURRENT_TAGS = [];
         NavigationSetActive($(this));
-        ClearPageMediaTags();
+        ClearPages();
         RenderPageGallery();
     });
 
@@ -556,7 +719,8 @@ function AddEventListenersNavigation() {
     $('#nav-tags-link').on('click', function () {
         PAGE_TYPE = PAGE_TAGS;
         CURRENT_TAGS = [];
-        ClearPageMediaTags();
+        NavigationSetActive($(this));
+        ClearPages();
         RenderPageTags();
     });
 
@@ -611,7 +775,10 @@ function AddEventListenersGallery() {
     // Tag Links
     $('.link-tags-page').on('click', function () {
         const itemID = $(this).data('id');
-        RenderPageMediaTags(itemID);       
+        const itemHash = $(this).data('hash');
+        const itemURL = $(`#item-full-${itemID}`).prop('href');
+        ClearPages();
+        RenderPageMediaTags(itemID, itemURL, itemHash);       
     });
 }
 
@@ -650,7 +817,8 @@ function AddEventListenersGalleryPagination() {
 function AddEventListenersMediaTags() {
     // Tag Back - Back to Gallery
     $('#back-to-gallery').on('click', function () {
-        ClearPageMediaTags();
+        ClearPages();
+        RenderPageGallery();
     });
 
     // Tag Category Shortcode Help Modal
@@ -662,14 +830,22 @@ function AddEventListenersMediaTags() {
     $('#add-tags').on('click', function () {
         const tagsInput = $('#add_tag');
         const tags = tagsInput.val();
-        const itemID = $('#tag-image').data('id');
+        let itemID, itemURL;
+        if (PAGE_TYPE === PAGE_IMAGES) {
+            itemID = $('#tag-image').data('id');
+            itemURL = $('#tag-image').prop('src');
+        } else if (PAGE_TYPE === PAGE_VIDEOS) {
+            itemID = $('#tag-video').data('id');
+            itemURL = $('#tag-video').prop('src');
+        }
+        const itemHash = $('#hash-display').html().replace('MD5 Hash: ', '');
 
         addTagsToItem(itemID, tags).then(() => {
             // Clear existing tags
             $('#tag-list').empty();
 
             // Get the new tags
-            RenderPageMediaTags(itemID);
+            RenderPageMediaTags(itemID, itemURL, itemHash);
 
             // Refresh Tag List Globally in case of new tags
             RefreshTags();
@@ -728,8 +904,12 @@ function setPageTitle() {
 
     if (PAGE_TYPE === PAGE_VIDEOS) {
         title = `${PAGE_TITLE} - Videos`;
-    } else {
+    } else if (PAGE_TYPE === PAGE_IMAGES) {
         title = `${PAGE_TITLE} - Images`;
+    } else if (PAGE_TYPE === PAGE_TAGS) {
+        title = `${PAGE_TITLE} - Tags`;
+    } else {
+        title = PAGE_TITLE;
     }
 
     // Set Title
@@ -799,6 +979,8 @@ async function getTags() {
         console.error('Error fetching tags:', error);
     }
 }
+
+
 
 /**
  * @function getTotalImages
