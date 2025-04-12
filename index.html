@@ -7,11 +7,13 @@
     <title>Gallery</title>
     <link rel="icon" type="image/png" href="favicon/icon.png" />
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+    <link href="https://cdn.datatables.net/v/bm/dt-2.2.2/b-3.2.2/b-colvis-3.2.2/cr-2.0.4/fc-5.0.4/fh-4.0.1/r-3.0.4/sl-3.0.0/sr-1.4.1/datatables.min.css" rel="stylesheet" integrity="sha384-5bJ4GlPS9DMHSRoy3GajoDfhZbtWoOnF7ic9kjISkxl/VFjx7nE0rrxaazLziRzi" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
     <link rel="stylesheet" type="text/css" href="css/external/lightbox.css" />
     <link rel="stylesheet" type="text/css" href="css/images.css" />
     <!-- Javascript -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/v/bm/dt-2.2.2/b-3.2.2/b-colvis-3.2.2/cr-2.0.4/fc-5.0.4/fh-4.0.1/r-3.0.4/sl-3.0.0/sr-1.4.1/datatables.min.js" integrity="sha384-ZAdkCbfexvOa0+LBTly+Evmv6E8f2KaYgfMp8BnKHITuQHGHYZGDd/cYsQlvD7VJ" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/external/lightbox.min.js"></script>
     <script type="text/javascript" src="js/gallery.js"></script>
     <!-- FontAwesome Kit -->
@@ -163,7 +165,7 @@
                                 <h4>Tag Categories</h4>
                                 <p>Tags have five categories they belong to, each having a different color when added they appear in an item's tag list. When you add
                                     a tag, you can add a shortcode followed by a colon before the tag to ensure it is added to the appropriate category. The shortcodes are as follows:</p>
-                                <table>
+                                <table class="table is-hoverable is-fullwidth">
                                     <thead>
                                         <tr>
                                             <th>Tag</th>
@@ -211,6 +213,28 @@
         </div>
     </section>
     <!-- Image/Video Tags Section END -->
+
+    <!-- Tag List Page Section START -->
+    <section class="section is-hidden" id="tags-list-content">
+        <div class="container">
+            <div class="content">
+                <table class="table is-striped is-hoverable" id="tag-list-page-table">
+                    <thead>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Category</th>
+                            <th>Image Count</th>
+                            <th>Video Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tag-list-page-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tag List Page Section END -->
 
     <!-- Footer START -->
     <footer class="footer is-flex-align-items-flex-end mt-auto">
