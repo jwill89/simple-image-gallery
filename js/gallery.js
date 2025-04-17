@@ -537,7 +537,7 @@ function RenderPageTags() {
                         case 'Character':
                             categoryClass = 'has-text-success';
                             break;
-                        case 'Series':
+                        case 'Source':
                             categoryClass = 'has-text-warning';
                             break;
                         case 'Personal List':
@@ -567,7 +567,7 @@ function RenderPageTags() {
                         case 'Character':
                             categoryClass = 'is-success';
                             break;
-                        case 'Series':
+                        case 'Source':
                             categoryClass = 'is-warning';
                             break;
                         case 'Personal List':
