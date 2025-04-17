@@ -164,7 +164,8 @@
                             <div class="content">
                                 <h4>Tag Categories</h4>
                                 <p>Tags have five categories they belong to, each having a different color when added they appear in an item's tag list. When you add
-                                    a tag, you can add a shortcode followed by a colon before the tag to ensure it is added to the appropriate category. The shortcodes are as follows:</p>
+                                    a tag, you can add a shortcode followed by a colon before the tag to ensure it is added to the appropriate category. Tags are also
+                                    converted to lowercase, so you do not need to worry about case when adding tags. The shortcodes are as follows:</p>
                                 <table class="table is-hoverable is-fullwidth">
                                     <thead>
                                         <tr>
@@ -189,14 +190,17 @@
                                             <td><span class="tag is-success">Character</span></td>
                                             <td><code>c:</code></td>
                                             <td>The name of a character in the image or video. We use a "&lt;First Name&gt; &lt;Last Name&gt;"
-                                                format for characters with a first and last name. For example, "Kurosaki Ichigo" would be <code>c:Ichigo Kurosaki</code>. If the character is known by a single name,
-                                                such as "Goku", then it would be <code>c:Goku</code>.</td>
+                                                format for characters with a first and last name. For example, "Kurosaki Ichigo" would be <code>c:ichigo kurosaki</code>. If the character is known by a single name,
+                                                such as "Goku", then it would be <code>c:goku</code>. If a character's name is one that is a name in multiple sources, please list the source after the name in parentheses,
+                                                such as "George" which could be <code>c:George</code></td>
                                         </tr>
                                         <tr>
                                             <td><span class="tag is-warning">Source</span></td>
                                             <td><code>s:</code></td>
                                             <td>The source material of the characters in the piece. This could be a movie, video game, anime, manga,
-                                                manhwa, etc. For works in foreign languages with non-roman characters, please use the romanization of the title.</td>
+                                                manhwa, etc. For works in foreign languages with non-roman characters, please use the romanization of the title.
+                                                If a source is part of a series, feel free to add the specific series, and create a "series" tag if it doesn't exist.
+                                                An example might be <code>s:dragonball super</code> or <code>s:dragonballz</code> along with <code>s:dragonball series</code></td>
                                         </tr>
                                         <tr>
                                             <td><span class="tag is-info">Personal List</span></td>
