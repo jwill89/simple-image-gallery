@@ -826,9 +826,25 @@ function AddEventListenersMediaTags() {
         OpenModal('help-modal-shortcodes');
     });
 
-    // Add Tags to Item
+    // Tag List - Enter Key
+    $('#add_tag').on('keyup', function (event) {
+        if (event.key === 'Enter') {
+            AddTagsToMedia();
+        }
+    });
+
+    // Add Tags - Button
     $('#add-tags').on('click', function () {
-        const tagsInput = $('#add_tag');
+        AddTagsToMedia();
+    });
+}
+
+/**
+ * @function AddTagsToMedia
+ * @description Adds tags to the media item currently being viewed.
+ */
+function AddTagsToMedia() {
+    const tagsInput = $('#add_tag');
         const tags = tagsInput.val();
         let itemID, itemURL;
         if (PAGE_TYPE === PAGE_IMAGES) {
@@ -853,7 +869,6 @@ function AddEventListenersMediaTags() {
 
         // Clear Tags Input
         tagsInput.val('');
-    });
 }
 
 /**
