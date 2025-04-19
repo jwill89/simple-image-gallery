@@ -39,7 +39,7 @@ abstract class AbstractController
      * @param array $parameters The parameters array.
      * @param string $parameter_name The name of the parameter to retrieve.
      * @param mixed $default_value The default value to return if the parameter is not found.
-     * 
+     *
      * @return mixed The value of the specified parameter or the default value.
      */
     protected function parseParameters(array $parameters, string $parameter_name, $default_value): mixed

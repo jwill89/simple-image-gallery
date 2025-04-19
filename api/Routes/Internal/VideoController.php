@@ -119,36 +119,37 @@ class VideoController extends AbstractController
      */
     public function getVideosWithTags(Request $request, Response $response, array $args): Response
     {
-       // Initialize Required Variables
-       $tag_list = explode(',', str_replace(' ', '', $this->parseParameters($args, 'tag_list', '')));
-       $items_per_page = (int)$this->parseParameters($args, 'items_per_page', Configuration::DEFAULT_PER_PAGE);
+        // Initialize Required Variables
+        $tag_list = explode(',', str_replace(' ', '', $this->parseParameters($args, 'tag_list', '')));
+        $page = (int)$this->parseParameters($args, 'page', 1);
+        $items_per_page = (int)$this->parseParameters($args, 'items_per_page', Configuration::DEFAULT_PER_PAGE);
 
-       // Assume status OK
-       $status = 200;
+        // Assume status OK
+        $status = 200;
 
-       // Default Data
-       $data = [];
-      
-       // Initialize Tag IDs for Collection Use
-       $tag_ids = [];
+        // Default Data
+        $data = [];
 
-       // Check the tags are valid
-       foreach ($tag_list as $tag_name) {
-           if (($tag = $this->tag_collection->getByName($tag_name)) !== null) {
-               $tag_ids[] = $tag->getTagId();
-           }
-       }
+        // Initialize Tag IDs for Collection Use
+        $tag_ids = [];
 
-       // Get the images with the tags
-       if (empty($tag_ids)) {
-           $data = ['error' => 'NoValidTagsSupplied'];
-           $status = 404;
-       } else {
-           $data = $this->video_collection->getWithTags($tag_ids);
-       }
+        // Check the tags are valid
+        foreach ($tag_list as $tag_name) {
+            if (($tag = $this->tag_collection->getByName($tag_name)) !== null) {
+                $tag_ids[] = $tag->getTagId();
+            }
+        }
 
-       // Return data as json with HTTP status response
-       return $response->withJson($data, $status);
+        // Get the images with the tags
+        if (empty($tag_ids)) {
+            $data = ['error' => 'NoValidTagsSupplied'];
+            $status = 404;
+        } else {
+            $data = $this->video_collection->getWithTags($tag_ids, $page, $items_per_page);
+        }
+
+        // Return data as json with HTTP status response
+        return $response->withJson($data, $status);
     }
 
     /**

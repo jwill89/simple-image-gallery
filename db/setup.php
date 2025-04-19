@@ -6,7 +6,7 @@ require_once('../vendor/autoload.php');
 use Gallery\Core\DatabaseConnection;
 
 // No DB Error
-$db_exists=  false;
+$db_exists = false;
 $db_writeable = false;
 
 // Create Database Connection
@@ -272,7 +272,6 @@ if (!$db_exists) {
     } else {
         echo "<p class='db-error'>Error creating table 'video_tags'. SQLite Code: " . $db->errorInfo()[1] . ", " . $db->errorInfo()[0] . " - " . $db->errorInfo()[2] . "</p>";
     }
-
 }
 
 echo <<<HTML

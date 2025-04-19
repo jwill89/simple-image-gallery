@@ -129,7 +129,7 @@ class ImageController extends AbstractController
 
         // Default Data
         $data = [];
-       
+
         // Initialize Tag IDs for Collection Use
         $tag_ids = [];
 

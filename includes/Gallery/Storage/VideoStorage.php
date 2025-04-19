@@ -37,7 +37,7 @@ class VideoStorage
      * Retrieves a video or an array of videos from the database.
      *
      * @param int|null $video_id The ID of the video to retrieve. If null, retrieves all videos.
-     * 
+     *
      * @return Video|Video[] An array of Video objects or a single Video object if an ID is provided.
      */
     public function retrieve(?int $video_id = null): Video|array
@@ -70,7 +70,7 @@ class VideoStorage
                     return $videos[0];
                 }
             }
-            
+
             $stmt->closeCursor();
         }
 
@@ -81,7 +81,7 @@ class VideoStorage
      * Get video based on supplied file name.
      *
      * @param string $file_name The file name of the video to retrieve.
-     * 
+     *
      * @return Video|null Returns a Video object if found, null otherwise.
      */
     public function retrieveByFilename(string $file_name): ?Video
@@ -108,7 +108,7 @@ class VideoStorage
                 // Fetch result
                 $video = $stmt->fetch();
             }
-            
+
             $stmt->closeCursor();
         }
 
@@ -121,7 +121,7 @@ class VideoStorage
      * @param array $tag_ids The tag IDs to filter videos by.
      * @param int $page_number The page number to retrieve.
      * @param int $items_per_page The number of items per page.
-     * 
+     *
      * @return Video[] An array of Video objects.
      */
     public function retrieveWithTags(array $tag_ids, int $page_number, int $items_per_page): array
@@ -171,7 +171,7 @@ class VideoStorage
      *
      * @param integer $page_number - The page number to retrieve.
      * @param integer $items_per_page - The number of items per page.
-     * 
+     *
      * @return Video[] An array of Video objects.
      */
     public function retrieveForPage(int $page_number, int $items_per_page): array
@@ -238,7 +238,7 @@ class VideoStorage
      * Gets the total number of videos with specific tags in the database.
      *
      * @param array $tag_ids - The tag IDs to filter videos by.
-     * 
+     *
      * @return int The total number of videos with the specified tags.
      */
     public function retrieveTotalVideoWithTagsCount(array $tag_ids): int
@@ -278,9 +278,9 @@ class VideoStorage
 
     /**
      * Check if a video exists in the database based on file name.
-     * 
+     *
      * @param string $file_name The file name of the video to check.
-     * 
+     *
      * @return bool Returns true if the video exists, false otherwise.
      */
     public function videoExistsInDatabase(string $file_name): bool
@@ -313,7 +313,7 @@ class VideoStorage
      * Saves a video to the database.
      *
      * @param Video $video The video object to store.
-     * 
+     *
      * @return int The ID of the stored video
      */
     public function store(Video $video): int
@@ -346,7 +346,7 @@ class VideoStorage
      * Deletes a video from the database based on the supplied video.
      *
      * @param Video $video The video object to delete.
-     * 
+     *
      * @return bool True if the video was deleted, false otherwise.
      */
     public function delete(Video $video): bool

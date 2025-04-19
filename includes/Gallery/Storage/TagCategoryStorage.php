@@ -38,7 +38,7 @@ class TagCategoryStorage
      * Retrieves a tag category or an array of tag categories from the database.
      *
      * @param integer|null $category_id The ID of the category to retrieve. If null, retrieves all categories.
-     * 
+     *
      * @return TagCategory|TagCategory[] An array of TagCategory objects or a single TagCategory object if an ID is provided.
      */
     public function retrieve(?int $category_id = null): TagCategory|array
@@ -71,7 +71,7 @@ class TagCategoryStorage
                     return $categories[0];
                 }
             }
-            
+
             $stmt->closeCursor();
         }
 
@@ -82,7 +82,7 @@ class TagCategoryStorage
      * Retrieves a tag category from the database based on short or returns null if it doesn't exist
      *
      * @param string $short The shortcode of the tag category to retrieve.
-     * 
+     *
      * @return TagCategory|null The tag category object if found, null otherwise.
      */
     public function retrieveByShortcode(string $short): ?TagCategory
@@ -114,7 +114,7 @@ class TagCategoryStorage
                     $category = null;
                 }
             }
-            
+
             $stmt->closeCursor();
         }
 
@@ -125,7 +125,7 @@ class TagCategoryStorage
      * Get tags based on supplied category.
      *
      * @param TagCategory $category The tag category to retrieve tags for.
-     * 
+     *
      * @return Tag[] An array of Tag objects.
      */
     public function retrieveTagsForCategory(TagCategory $category): array
@@ -149,7 +149,7 @@ class TagCategoryStorage
                 // Fetch results
                 $tags = $stmt->fetchAll(PDO::FETCH_CLASS, Tag::class);
             }
-            
+
             $stmt->closeCursor();
         }
 
@@ -160,7 +160,7 @@ class TagCategoryStorage
      * Saves a tag category to the database.
      *
      * @param TagCategory $category The tag category to save.
-     * 
+     *
      * @return int The ID of the newly saved tag category.
      */
     public function store(TagCategory $category): int
@@ -192,7 +192,7 @@ class TagCategoryStorage
      * Deletes a tag category from the database.
      *
      * @param TagCategory $category The tag category to delete.
-     * 
+     *
      * @return bool True if the category was deleted, false otherwise.
      */
     public function delete(TagCategory $category): bool

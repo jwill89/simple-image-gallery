@@ -27,9 +27,9 @@ class TagCategoryCollection
 
     /**
      * Gets a tag category based on supplied category ID.
-     * 
+     *
      * @param int $category_id Category ID to retrieve.
-     * 
+     *
      * @return TagCategory|null TagCategory object if found, null otherwise.
      */
     public function get(int $category_id): ?TagCategory
@@ -48,7 +48,7 @@ class TagCategoryCollection
      * Gets a tag category based on supplied shortcode, if it exists.
      *
      * @param string $short Shortcode of tag category to retrieve.
-     * 
+     *
      * @return TagCategory|null TagCategory object if found, null otherwise.
      */
     public function getByShortcode(string $short): ?TagCategory
@@ -70,7 +70,7 @@ class TagCategoryCollection
      * Gets tags belonging to a specific category.
      *
      * @param TagCategory $category The category to retrieve tags for.
-     * 
+     *
      * @return Tag[] Array of Tag objects belonging to the category.
      */
     public function getTagsForCategory(TagCategory $category): array
@@ -82,21 +82,20 @@ class TagCategoryCollection
      * Saves a tag category to the database.
      *
      * @param TagCategory $category The tag category to save.
-     * 
+     *
      * @return int The ID of the saved tag category.
      */
     public function save(TagCategory $category): int
     {
         // Save the tag to the database
         return $this->storage->store($category);
-        
     }
 
     /**
      * Deletes a tag category from the database.
      *
      * @param TagCategory $category The tag category to delete.
-     * 
+     *
      * @return bool True if deletion was successful, false otherwise.
      */
     public function delete(TagCategory $category): bool

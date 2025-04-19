@@ -31,7 +31,7 @@ class TagCollection
     /**
      * get function
      * Gets an tag based on supplied tag ID.
-     * 
+     *
      * @param int $tag_id
      * @return Tag|null
      */
@@ -191,7 +191,6 @@ class TagCollection
     {
         // Save the tag to the database
         return $this->storage->store($tag);
-        
     }
 
     /**

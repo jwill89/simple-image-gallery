@@ -17,7 +17,7 @@ class Video extends AbstractStructure
 
     /**
      * Get the ID of the video.
-     * 
+     *
      * @return int The ID of the video.
      */
     public function getVideoId(): int
@@ -59,7 +59,7 @@ class Video extends AbstractStructure
      * Set the ID of the video.
      *
      * @param int $id The ID to set.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setVideoId(int $video_id): self
@@ -72,7 +72,7 @@ class Video extends AbstractStructure
      * Set the file name of the video.
      *
      * @param string $file_name The file name to set.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setFileName(string $file_name): self
@@ -85,7 +85,7 @@ class Video extends AbstractStructure
      * Set the file time of the video.
      *
      * @param int $file_time The file time as a Unix timestamp.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setFileTime(int $file_time): self
@@ -98,7 +98,7 @@ class Video extends AbstractStructure
      * Set the md5 hash of the video
      *
      * @param string $hash The md5 hash to set.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setHash(string $hash): self

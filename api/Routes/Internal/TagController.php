@@ -156,7 +156,6 @@ class TagController extends AbstractController
             $image = $this->image_collection->get($image_id);
             // Get the tags for the image
             $data = $this->tag_collection->getTagsForImage($image);
-        
         }
 
         // Return data as json with HTTP status response

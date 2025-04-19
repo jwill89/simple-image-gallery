@@ -1,6 +1,7 @@
 <?php
 
 namespace Gallery\Structure;
+
 /**
  * Tag class
  * This class represents a tag in the gallery.
@@ -47,7 +48,7 @@ class Tag extends AbstractStructure
      * Set the ID of the tag.
      *
      * @param int $tag_id The ID of the tag.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setTagId(int $tag_id): self
@@ -60,7 +61,7 @@ class Tag extends AbstractStructure
      * Set the ID of the category.
      *
      * @param int $category_id The ID of the category.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setCategoryId(int $category_id): self
@@ -73,7 +74,7 @@ class Tag extends AbstractStructure
      * Set the tag name.
      *
      * @param string $tag_name The name of the tag.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setTagName(string $tag_name): self

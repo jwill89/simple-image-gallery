@@ -35,7 +35,7 @@ $app->addRoutingMiddleware();
 $error_middleware = $app->addErrorMiddleware(true, true, true);
 
 // Setup Allowables and Response Origins
-$app->add(function(ServerRequestInterface $request,  RequestHandlerInterface $handler): ResponseInterface {
+$app->add(function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
     $response = $handler->handle($request);
     return $response
         ->withHeader('Access-Control-Allow-Credentials', 'true')

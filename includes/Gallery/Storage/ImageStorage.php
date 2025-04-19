@@ -8,7 +8,7 @@ use Gallery\Structure\Image;
 
 /**
  * ImageStorage Class
- * 
+ *
  * This class is responsible for managing image storage in the database.
  */
 class ImageStorage
@@ -25,7 +25,7 @@ class ImageStorage
 
     /**
      * Class constructor
-     * 
+     *
      * Initializes the Database Connection.
      */
     public function __construct()
@@ -39,7 +39,7 @@ class ImageStorage
      * Retrieves an image or an array of images from the database.
      *
      * @param int|null $image_id Optional. The ID of the image to retrieve. If null, retrieves all images.
-     * 
+     *
      * @return Image|Image[] An Image object if $image_id is provided, otherwise an array of Image objects.
      */
     public function retrieve(?int $image_id = null): Image|array
@@ -72,7 +72,7 @@ class ImageStorage
                     return $images[0];
                 }
             }
-            
+
             $stmt->closeCursor();
         }
 
@@ -83,7 +83,7 @@ class ImageStorage
      * Get image based on supplied file name.
      *
      * @param string $file_name The file name of the image to retrieve.
-     * 
+     *
      * @return Image|null An Image object if found, otherwise null.
      */
     public function retrieveByFilename(string $file_name): ?Image
@@ -110,7 +110,7 @@ class ImageStorage
                 // Fetch result
                 $image = $stmt->fetch();
             }
-            
+
             $stmt->closeCursor();
         }
 
@@ -123,7 +123,7 @@ class ImageStorage
      * @param array $tag_ids The array of tag IDs to search for.
      * @param int $page_number The page number to retrieve.
      * @param int $items_per_page The number of items per page.
-     * 
+     *
      * @return Image[] An array of Image objects.
      */
     public function retrieveWithTags(array $tag_ids, int $page_number, int $items_per_page): array
@@ -173,7 +173,7 @@ class ImageStorage
      *
      * @param integer $page_number The page number to retrieve.
      * @param integer $items_per_page The number of items per page.
-     * 
+     *
      * @return Image[] An array of Image objects.
      */
     public function retrieveForPage(int $page_number, int $items_per_page): array
@@ -225,7 +225,6 @@ class ImageStorage
 
         // If prepared successfully
         if ($stmt) {
-
             // Try executing
             if ($stmt->execute()) {
                 $total = (int)$stmt->fetchColumn();
@@ -239,7 +238,7 @@ class ImageStorage
 
     /**
      * Gets the total number of images in the database with specific tags.
-     * 
+     *
      * @param array $tag_ids The array of tag IDs to search for.
      *
      * @return int The total number of images with the specified tags.
@@ -281,11 +280,11 @@ class ImageStorage
 
     /**
      * Check if an image exists in the database based on file name or md5 hash.
-     * 
+     *
      * @param string $file_name The file name of the image to check.
-     * @param string $hash The md5 hash of the image to check. 
-     * 
-     * @return bool True if the image exists, false otherwise. 
+     * @param string $hash The md5 hash of the image to check.
+     *
+     * @return bool True if the image exists, false otherwise.
      */
     public function imageExistsInDatabase(string $file_name, string $hash): bool
     {
@@ -318,7 +317,7 @@ class ImageStorage
      * Saves an image to the database.
      *
      * @param Image $image The image object to save.
-     * 
+     *
      * @return int The ID of the newly saved image.
      */
     public function store(Image $image): int
@@ -352,7 +351,7 @@ class ImageStorage
      * Deletes an image from the database based on the supplied image.
      *
      * @param Image $image The image object to delete.
-     * 
+     *
      * @return bool True if the image was deleted, false otherwise.
      */
     public function delete(Image $image): bool

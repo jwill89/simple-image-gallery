@@ -1,4 +1,5 @@
 <?php
+
 // Debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -29,7 +30,7 @@ $video_dir_full = VideoCollection::VIDEO_DIRECTORY_FULL;
 $video_dir_thumbs = VideoCollection::VIDEO_DIRECTORY_THUMBNAILS;
 
 // Get the images in the folder
-$images_in_folder = array_filter(scandir(ImageCollection::IMAGE_DIRECTORY), function($item) {
+$images_in_folder = array_filter(scandir(ImageCollection::IMAGE_DIRECTORY), function ($item) {
     return !is_dir(ImageCollection::IMAGE_DIRECTORY . $item);
 });
 
@@ -42,7 +43,7 @@ usort($images_in_folder, function ($a, $b) {
 $images_in_database = $image_collection->getAll();
 
 // Get the videos in the folder
-$videos_in_folder = array_filter(scandir(VideoCollection::VIDEO_DIRECTORY), function($item) {
+$videos_in_folder = array_filter(scandir(VideoCollection::VIDEO_DIRECTORY), function ($item) {
     return !is_dir(VideoCollection::VIDEO_DIRECTORY . $item);
 });
 
@@ -68,122 +69,100 @@ $video_hashes = [];
 
 // Remove images from the database that do not exist in the images folder
 /** @var Image $img */
-foreach($images_in_database as $img) {
-
+foreach ($images_in_database as $img) {
     if (!file_exists($image_dir_full . $img->getFileName())) {
-
         // Delete from DB
         if ($image_collection->delete($img)) {
-			$images_removed++;
-		}
-
+            $images_removed++;
+        }
     } else {
-		
-		// Image Exists, add it to our hash array
-		$image_hashes[] = $img->getHash();
-		
-	}
+        // Image Exists, add it to our hash array
+        $image_hashes[] = $img->getHash();
+    }
 }
-
 
 // Remove videos from the database that do not exist in the videos folder
 /** @var Video $vid */
-foreach($videos_in_database as $vid) {
-	
-	if (!file_exists($video_dir_full . $vid->getFileName())) {
-
+foreach ($videos_in_database as $vid) {
+    if (!file_exists($video_dir_full . $vid->getFileName())) {
         // Delete from DB
         if ($video_collection->delete($vid)) {
-			$videos_removed++;
-		}
-
+            $videos_removed++;
+        }
     } else {
-		
-		// Image Exists, add it to our hash array
-		$video_hashes[] = $vid->getHash();
-		
-	}
+        // Image Exists, add it to our hash array
+        $video_hashes[] = $vid->getHash();
+    }
 }
 
 // Add New Images
-foreach($images_in_folder as $file_name){
-
+foreach ($images_in_folder as $file_name) {
     // Check if the MD5 Hash already exists
     $image_md5 = md5_file(ImageCollection::IMAGE_DIRECTORY . $file_name);
 
     // Make sure the file doesn't already exist, check by MD5. Image Hash not necessary *yet*
     if (!in_array($image_md5, $image_hashes)) {
-
         // Create the Image
-		$image = new Image();
-		$image->setFileName($file_name)
-			->setFileTime(filemtime(ImageCollection::IMAGE_DIRECTORY . $file_name))
-			->setHash($image_md5);
-		
-		// Save the image (auto-creates thumbnail on save)
-		if ($image_collection->save($image) !== 0) {
-			// Move the File to the full directory.
-			rename(ImageCollection::IMAGE_DIRECTORY . $file_name, $image_dir_full . $file_name);
+        $image = new Image();
+        $image->setFileName($file_name)
+            ->setFileTime(filemtime(ImageCollection::IMAGE_DIRECTORY . $file_name))
+            ->setHash($image_md5);
 
-			// Increase the Images Added Count
-			$images_added++;
-		} else {
-			// Increase the Images Not Added Count
-			$images_not_added++;
-		}
+        // Save the image (auto-creates thumbnail on save)
+        if ($image_collection->save($image) !== 0) {
+            // Move the File to the full directory.
+            rename(ImageCollection::IMAGE_DIRECTORY . $file_name, $image_dir_full . $file_name);
 
-	} else {
+            // Increase the Images Added Count
+            $images_added++;
+        } else {
+            // Increase the Images Not Added Count
+            $images_not_added++;
+        }
+    } else {
+        // Delete File
+        $full_file = ImageCollection::IMAGE_DIRECTORY . $file_name;
+        unlink($full_file);
 
-		// Delete File
-		$full_file = ImageCollection::IMAGE_DIRECTORY . $file_name;
-		unlink($full_file);
+        $images_not_added++;
 
-		$images_not_added++;
-
-		continue;
-
-	}
+        continue;
+    }
 }
 
 // Loop Through Videos and GIFs
 foreach ($videos_in_folder as $file_name) {
+    $video_md5 = md5_file(VideoCollection::VIDEO_DIRECTORY . $file_name);
 
-	$video_md5 = md5_file(VideoCollection::VIDEO_DIRECTORY . $file_name);
-	
-	// Make sure the file doesn't already exist, check by MD5. Video Hash not necessary *yet*
+    // Make sure the file doesn't already exist, check by MD5. Video Hash not necessary *yet*
     if (!in_array($video_md5, $video_hashes)) {
-		
-		// Create a new video
-		$video = new Video();
-		$video->setFileName($file_name)
-			->setFileTime(filemtime(VideoCollection::VIDEO_DIRECTORY . $file_name))
-			->setHash($video_md5);
-	
-		// Save the video
-		if ($video_collection->save($video) !== 0) {
-			// Move the File to the full directory.
-			rename(VideoCollection::VIDEO_DIRECTORY . $file_name, $video_dir_full . $file_name);
+        // Create a new video
+        $video = new Video();
+        $video->setFileName($file_name)
+            ->setFileTime(filemtime(VideoCollection::VIDEO_DIRECTORY . $file_name))
+            ->setHash($video_md5);
 
-			// Increase the Videos Added Count
-			$videos_added++;
-		} else {
-			// Increase the Videos Not Added Count
-			$videos_not_added++;
-		}
-	
-	} else {
-		
-		// Delete File
+        // Save the video
+        if ($video_collection->save($video) !== 0) {
+            // Move the File to the full directory.
+            rename(VideoCollection::VIDEO_DIRECTORY . $file_name, $video_dir_full . $file_name);
+
+            // Increase the Videos Added Count
+            $videos_added++;
+        } else {
+            // Increase the Videos Not Added Count
+            $videos_not_added++;
+        }
+    } else {
+        // Delete File
         $full_file = VideoCollection::VIDEO_DIRECTORY . $file_name;
         unlink($full_file);
 
         $videos_not_added++;
 
         continue;
-		
-	}
+    }
 }
-
 
 // End Script Time
 $end_time = microtime(true);

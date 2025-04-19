@@ -1,6 +1,7 @@
 <?php
 
 namespace Gallery\Structure;
+
 /**
  * TagCategory class
  * This class represents a tag category in the gallery.
@@ -59,7 +60,7 @@ class TagCategory extends AbstractStructure
      * Set the category name.
      *
      * @param string $category_name The name of the category.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setCategoryName(string $category_name): self
@@ -72,7 +73,7 @@ class TagCategory extends AbstractStructure
      * Set the category short name.
      *
      * @param string $category_short The short name of the category.
-     * 
+     *
      * @return $this Returns the current instance for method chaining.
      */
     public function setCategoryShort(string $category_short): self

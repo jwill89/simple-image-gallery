@@ -23,7 +23,7 @@ class VideoCollection
     public const string VIDEO_DIRECTORY = 'videos/';
     public const string VIDEO_DIRECTORY_FULL = 'videos/full/';
     public const string VIDEO_DIRECTORY_THUMBNAILS = 'videos/thumbs/';
-    
+
     // Video Database Storage Object
     private VideoStorage $storage;
 
@@ -40,9 +40,9 @@ class VideoCollection
 
     /**
      * Gets an video based on supplied video ID.
-     * 
+     *
      * @param int $video_id The ID of the video to retrieve.
-     * 
+     *
      * @return Video The Video object corresponding to the supplied ID.
      */
     public function get(int $video_id): Video
@@ -65,7 +65,7 @@ class VideoCollection
      *
      * @param int $page_number The page number to retrieve.
      * @param int|null $items_per_page Optional. The number of items per page. Defaults to the number set in the Configuration.
-     * 
+     *
      * @return Video[] An array of Video objects for the specified page.
      */
     public function getForPage(int $page_number, ?int $items_per_page = null): array
@@ -82,7 +82,7 @@ class VideoCollection
      * @param array $tag_ids The tag IDs to filter videos by.
      * @param int $page_number The page number to retrieve.
      * @param int|null $items_per_page Optional. The number of items per page. Defaults to the number set in the Configuration.
-     * 
+     *
      * @return Video[] An array of Video objects for the specified page and tags.
      */
     public function getWithTags(array $tag_ids, int $page_number, ?int $items_per_page = null): array
@@ -107,7 +107,7 @@ class VideoCollection
      * Gets the total number of videos in the database with specific tags.
      *
      * @param array $tag_ids The tag IDs to filter videos by.
-     * 
+     *
      * @return int The total number of videos with the specified tags.
      */
     public function totalVideosWithTags(array $tag_ids): int
@@ -119,7 +119,7 @@ class VideoCollection
      * Saves an video to the database and generates a thumbnail.
      *
      * @param Video $video The Video object to save.
-     * 
+     *
      * @return int The ID of the newly saved video.
      */
     public function save(Video $video): int
@@ -129,7 +129,6 @@ class VideoCollection
 
         // If we have an ID, we can assume it was successful and generate a thumbnail
         if ($video_id > 0) {
-
             // Determine if we need to use Imagick or FFMpeg to make the Thumbnail
             if (pathinfo($video->getFileName(), PATHINFO_EXTENSION) === 'gif') {
                 // Use Imagick to create a thumbnail for GIFs
@@ -167,14 +166,13 @@ class VideoCollection
         if (file_exists($thumbnail_path)) {
             $this->resizeThumbnail($thumbnail_path);
         }
-        
     }
 
     /**
      * Creates a thumbnail for GIFs using Imagick.
-     * 
+     *
      * @param Video $video_obj The Video object for which to create a thumbnail.
-     * 
+     *
      * @throws ImagickException
      */
     public function createGifThumbnail(Video $video_obj): void
@@ -191,8 +189,6 @@ class VideoCollection
         } catch (ImagickException $e) {
             // NDo Not Optimize
         }
-        
-
 
         // If the image is wider
         if ($image->getImageHeight() <= $image->getImageWidth()) {
@@ -218,7 +214,7 @@ class VideoCollection
         $image_file_name = pathinfo($image->getImageFilename());
 
         // Write Thumbnail
-        $image->writeImage(self::VIDEO_DIRECTORY_THUMBNAILS . $image_file_name['filename']. '.' . 'jpg');
+        $image->writeImage(self::VIDEO_DIRECTORY_THUMBNAILS . $image_file_name['filename'] . '.' . 'jpg');
 
         $image->clear();
     }
@@ -258,7 +254,7 @@ class VideoCollection
      * Deletes an video from the database and the filesystem.
      *
      * @param Video $video The Video object to delete.
-     * 
+     *
      * @return bool True if the video was successfully deleted, false otherwise.
      */
     public function delete(Video $video): bool
@@ -270,7 +266,7 @@ class VideoCollection
         if ($success) {
             $video_path = self::VIDEO_DIRECTORY_FULL . $video->getFileName();
             $video_path_info = pathinfo($video_path);
-            $thumbnail_path = self::VIDEO_DIRECTORY_THUMBNAILS . $video_path_info['filename']. '.' . 'jpg';
+            $thumbnail_path = self::VIDEO_DIRECTORY_THUMBNAILS . $video_path_info['filename'] . '.' . 'jpg';
 
             // Delete the video file
             if (file_exists($video_path)) {

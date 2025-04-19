@@ -510,7 +510,7 @@ function RenderPageTags() {
         destroy: true,
         processing: true,
         searching: true,
-        autowidth: true,
+        autoWidth: true,
         paging: true,
         scrollCollapse: true,
         colReorder: true,
