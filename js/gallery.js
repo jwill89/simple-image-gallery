@@ -508,6 +508,7 @@ function RenderPageTags() {
             dataSrc: ''
         },
         destroy: true,
+        retrieve: true,
         processing: true,
         searching: true,
         autoWidth: true,
@@ -599,6 +600,9 @@ function RenderPageTags() {
             }
         ]
     });
+
+    // Add Event Listeners
+    AddEventListenersToTagsList();
 
     // Show the Tags Section
     tagsSection.removeClass('is-hidden');
@@ -837,6 +841,120 @@ function AddEventListenersMediaTags() {
     $('#add-tags').on('click', function () {
         AddTagsToMedia();
     });
+}
+
+/**
+ * @function AddEventListenersTagsList
+ * @description Binds the tag list page items to their respective functions.
+ */
+function AddEventListenersToTagsList() {
+    // Get Elements
+    const tagNameInput = $('#new_tag_tag_name');
+    const tagCategorySelect = $('#new_tag_category_select');
+    const tagSubmitButton = $('#new_tag_btn_submit');
+    const tagResetButton = $('#new_tag_btn_reset');
+    const helpText = $('#new_tag_tag_name_help');
+
+    // Get the DataTable
+    const tagTable = $('#tag-list-page-table').DataTable();
+
+    // New Tag Name - Keyup Check Existing
+    tagNameInput.on('keyup', function (event) {
+        // Get the current tag info
+        const tagName = tagNameInput.val();
+
+        // Get the existing tags from the DataTable
+        const existingTags = tagTable.column(0).data().toArray();
+
+        // Do not trigger on enter
+        if (event.key !== 'Enter') {
+
+            // Check if the tag name already exists
+            if (existingTags.includes(tagName)) {
+                tagNameInput.addClass('is-danger');
+                tagNameInput.removeClass('is-success');
+                helpText.html('Tag already exists.');
+                helpText.addClass('is-danger');
+                helpText.removeClass('is-hidden is-success');
+            } else if (tagName.length > 0) {
+                tagNameInput.addClass('is-success');
+                tagNameInput.removeClass('is-danger');
+                helpText.html('Tag is available.');
+                helpText.addClass('is-success');
+                helpText.removeClass('is-hidden is-danger');
+            } else {
+                tagNameInput.removeClass('is-danger is-success');
+                helpText.html('');
+                helpText.addClass('is-hidden');
+                helpText.removeClass('is-danger is-success');
+            }
+        } else {
+            // Add the tag
+            AddNewTag();
+        }
+    });
+
+    // New Tag - Submit Button
+    tagSubmitButton.on('click', function () {
+        AddNewTag();
+    });
+
+    // New Tag - Reset Button
+    tagResetButton.on('click', function () {
+        // Clear the input
+        tagNameInput.val('');
+        tagNameInput.removeClass('is-danger is-success');
+        tagCategorySelect.prop('selectedIndex', 0);
+
+        // Clear the help text
+        helpText.html('');
+        helpText.addClass('is-hidden');
+        helpText.removeClass('is-danger is-success');
+    });
+}
+
+/**
+ * @function AddNewTag
+ * @description Adds a new tag to the database and refreshes the tag list.
+ */
+function AddNewTag() {
+    // Get Elements
+    const tagNameInput = $('#new_tag_tag_name');
+    const tagCategorySelect = $('#new_tag_category_select');
+    const helpText = $('#new_tag_tag_name_help');
+    const tagTable = $('#tag-list-page-table').DataTable();
+
+    // Get the current tag info
+    const tagName = tagNameInput.val();
+    const tagCategory = tagCategorySelect.val();
+
+    // Get the existing tags from the DataTable
+    const existingTags = tagTable.column(0).data().toArray();
+
+    // Check if the tag name is valid
+    if (tagName.length > 0 && existingTags.includes(tagName) === false) {
+        addTag(tagName, tagCategory).then(() => {
+            // Clear the input
+            tagNameInput.val('');
+            tagNameInput.removeClass('is-danger is-success');
+            tagCategorySelect.prop('selectedIndex', 0);
+
+            // Clear the help text
+            helpText.html('');
+            helpText.addClass('is-hidden');
+            helpText.removeClass('is-danger is-success');
+
+            // Refresh the tags list
+            RefreshTags();
+
+            // Refresh the DataTable
+            tagTable.ajax.reload();
+        });
+    } else {
+        helpText.html('You cannot submit an empty tag or a tag that already exists.');
+        helpText.addClass('is-danger');
+        tagNameInput.addClass('is-danger');
+    }
 }
 
 /**
@@ -1202,5 +1320,34 @@ async function addTagsToItem(itemID, tags) {
         return data;
     } catch (error) {
         console.error('Error adding tags to item:', error);
+    }
+}
+
+/**
+ * @function addTag
+ * @description Adds a new tag to the database.
+ * @async
+ * @param {string} tagName 
+ * @param {number} tagCategory 
+ * @returns {Promise} A promise that resolves to the tag data for the DataTable.
+ */
+async function addTag(tagName, tagCategory) {
+    const apiLink = `${API_BASE_URL}/tags/add/`;
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    try {
+        const response = await fetch(apiLink, {
+            method: 'POST',
+            body: JSON.stringify({'tag_name': tagName, 'category_id': tagCategory}),
+            headers: myHeaders,
+        });
+
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        console.error('Error adding tag:', error);
     }
 }

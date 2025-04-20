@@ -41,7 +41,7 @@ $app->add(function (ServerRequestInterface $request, RequestHandlerInterface $ha
         ->withHeader('Access-Control-Allow-Credentials', 'true')
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, PATCH')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH')
         ->withHeader('X-Frame-Options', 'SAMEORIGIN');
 });
 
@@ -65,6 +65,8 @@ $app->group('/videos', function (RouteCollectorProxy $group) {
 $app->group('/tags', function (RouteCollectorProxy $group) {
     $group->get('/all[/]', TagController::class . ':getAllTags');
     $group->get('/display[/]', TagController::class . ':getTagListForDisplay');
+    $group->post('/add[/]', TagController::class . ':addTag');
+    $group->put('/edit/{tag_id}[/]', TagController::class . ':editTag');
     $group->get('/tag/{tag_id}[/]', TagController::class . ':getTag');
     $group->get('/for/image/{image_id}[/]', TagController::class . ':getTagsForImage');
     $group->get('/for/video/{video_id}[/]', TagController::class . ':getTagsForVideo');

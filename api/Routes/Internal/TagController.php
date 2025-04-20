@@ -6,6 +6,7 @@ use Psr\Container\ContainerInterface;
 use Slim\Http\ServerRequest as Request;
 use Slim\Http\Response;
 use Gallery\Collection\TagCollection;
+use Gallery\Collection\TagCategoryCollection;
 use Gallery\Collection\ImageCollection;
 use Gallery\Collection\VideoCollection;
 use Gallery\Structure\Image;
@@ -19,6 +20,7 @@ use Gallery\Structure\Tag;
 class TagController extends AbstractController
 {
     private TagCollection $tag_collection;
+    private TagCategoryCollection $tag_category_collection;
     private ImageCollection $image_collection;
     private VideoCollection $video_collection;
 
@@ -36,6 +38,7 @@ class TagController extends AbstractController
 
         // Set collections for user in class methods
         $this->tag_collection = new TagCollection();
+        $this->tag_category_collection = new TagCategoryCollection();
         $this->image_collection = new ImageCollection();
         $this->video_collection = new VideoCollection();
     }
@@ -121,6 +124,57 @@ class TagController extends AbstractController
 
         // Get all tags
         $data = $this->tag_collection->getAllForPage();
+
+        // Return data as json with HTTP status response
+        return $response->withJson($data, $status);
+    }
+
+    public function addTag(Request $request, Response $response, array $args): Response
+    {
+        // Initialize Required Variables
+        $params = $request->getParsedBody();
+        $tag_name = trim($this->parseParameters($params, 'tag_name', ''));
+        $tag_category = (int)$this->parseParameters($params, 'category_id', 1);
+
+        // Assume OK status
+        $status = 200;
+
+        // Initialize Data
+        $data = null;
+
+        // Check for valid tag name
+        if (empty($tag_name)) {
+            $data = ['error' => 'InvalidTagName'];
+            $status = 400;
+        } elseif ($this->tag_collection->getByName($tag_name) instanceof Tag) {
+            $data = ['error' => 'TagAlreadyExists'];
+            $status = 400;
+        } else {
+            // Create the tag
+            $tag = new Tag();
+            $tag->setTagName($tag_name)
+                ->setCategoryId($tag_category);
+
+            // Save the tag
+            $tag_id = $this->tag_collection->save($tag);
+
+            // Check to ensure tag was created
+            if ($tag_id === 0) {
+                $data = ['error' => 'CouldNotCreateTag'];
+                $status = 500;
+            } else {
+                // Get the Category Name
+                $category = $this->tag_category_collection->get($tag_category);
+
+                // Set the tag data for the table
+                $data = [
+                    'tag_name'      => $tag->getTagName(),
+                    'category_name' => $category->getCategoryName(),
+                    'image_count'   => 0,
+                    'video_count'   => 0
+                ];
+            }
+        }
 
         // Return data as json with HTTP status response
         return $response->withJson($data, $status);
