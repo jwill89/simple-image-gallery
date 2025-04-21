@@ -140,7 +140,7 @@ class TagController extends AbstractController
         $status = 200;
 
         // Initialize Data
-        $data = null;
+        $data = true;
 
         // Check for valid tag name
         if (empty($tag_name)) {
@@ -162,17 +162,55 @@ class TagController extends AbstractController
             if ($tag_id === 0) {
                 $data = ['error' => 'CouldNotCreateTag'];
                 $status = 500;
-            } else {
-                // Get the Category Name
-                $category = $this->tag_category_collection->get($tag_category);
+            }
+        }
 
-                // Set the tag data for the table
-                $data = [
-                    'tag_name'      => $tag->getTagName(),
-                    'category_name' => $category->getCategoryName(),
-                    'image_count'   => 0,
-                    'video_count'   => 0
-                ];
+        // Return data as json with HTTP status response
+        return $response->withJson($data, $status);
+    }
+
+    public function editTag(Request $request, Response $response, array $args): Response
+    {
+        // Initialize Required Variables
+        $params = $request->getParsedBody();
+        $tag_id = (int)$this->parseParameters($args, 'tag_id', 0);
+        $tag_name = trim($this->parseParameters($params, 'tag_name', ''));
+        $tag_category = (int)$this->parseParameters($params, 'category_id', 1);
+
+        // Assume OK status
+        $status = 200;
+
+        // Initialize Data
+        $data = true;
+
+        // Check for valid tag ID and name
+        if ($tag_id <= 0) {
+            $data = ['error' => 'InvalidTagID'];
+            $status = 400;
+        } elseif (empty($tag_name)) {
+            $data = ['error' => 'InvalidTagName'];
+            $status = 400;
+        } else {
+            // Get the tag
+            $tag = $this->tag_collection->get($tag_id);
+
+            // Validate it's an tag
+            if (!($tag instanceof Tag)) {
+                $data = ['error' => 'TagDoesNotExist'];
+                $status = 404;
+            } else {
+                // Set the tag data
+                $tag->setTagName($tag_name)
+                    ->setCategoryId($tag_category);
+
+                // Save the tag
+                $saved_id = $this->tag_collection->save($tag);
+
+                // Check to ensure we saved
+                if ($saved_id !== 0) {
+                    $data = ['error' => 'CouldNotSaveTag'];
+                    $status = 500;
+                }
             }
         }
 
@@ -411,7 +449,7 @@ class TagController extends AbstractController
     {
         // Initialize Required Variables
         $params = $request->getParsedBody();
-        $image_id = (int)$this->parseParameters($params, 'image_id', 0);
+        $image_id = (int)$this->parseParameters($params, 'item_id', 0);
         $tag_id = (int)$this->parseParameters($params, 'tag_id', 0);
 
         // Assume OK status
@@ -434,7 +472,7 @@ class TagController extends AbstractController
                 $status = 404;
             } else {
                 // Check for valid tag name
-                if ($$tag_id <= 0) {
+                if ($tag_id <= 0) {
                     $data = ['error' => 'InvalidTagID'];
                     $status = 404;
                 } else {
@@ -479,7 +517,7 @@ class TagController extends AbstractController
     {
         // Initialize Required Variables
         $params = $request->getParsedBody();
-        $video_id = (int)$this->parseParameters($params, 'video_id', 0);
+        $video_id = (int)$this->parseParameters($params, 'item_id', 0);
         $tag_id = (int)$this->parseParameters($params, 'tag_id', 0);
 
         // Assume OK status
@@ -502,7 +540,7 @@ class TagController extends AbstractController
                 $status = 404;
             } else {
                 // Check for valid tag name
-                if ($$tag_id <= 0) {
+                if ($tag_id <= 0) {
                     $data = ['error' => 'InvalidTagID'];
                     $status = 404;
                 } else {

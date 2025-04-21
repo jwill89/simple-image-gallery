@@ -197,7 +197,12 @@ class TagStorage
         $tags = [];
 
         // Setup the Query
-        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt LEFT JOIN " . self::IMAGE_TAG_TABLE .  " it USING (tag_id) WHERE it.image_id = :image_id ORDER BY tt.tag_name ASC";
+        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt
+                    LEFT JOIN " . self::IMAGE_TAG_TABLE .  " it USING (tag_id)
+                    WHERE it.image_id = :image_id 
+                    ORDER BY CASE WHEN tt.category_id = 1 THEN 10
+                                  ELSE tt.category_id END,
+                            tt.tag_name ASC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -232,7 +237,12 @@ class TagStorage
         $tags = [];
 
         // Setup the Query
-        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt LEFT JOIN " . self::VIDEO_TAG_TABLE .  " vt USING (tag_id) WHERE vt.video_id = :video_id ORDER BY tt.tag_name ASC";
+        $sql = "SELECT tt.* FROM " . self::MAIN_TABLE . " tt
+                    LEFT JOIN " . self::VIDEO_TAG_TABLE .  " vt USING (tag_id)
+                    WHERE vt.video_id = :video_id
+                    ORDER BY CASE WHEN tt.category_id = 1 THEN 10
+                                  ELSE tt.category_id END,
+                            tt.tag_name ASC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -265,10 +275,11 @@ class TagStorage
         $tag_data = [];
 
         // Setup the Query
-        $sql = "SELECT t.tag_name, tc.category_name,
+        $sql = "SELECT t.tag_id, t.tag_name, t.category_id, tc.category_name,
                 (SELECT COUNT(*) FROM " . self::IMAGE_TAG_TABLE . " it WHERE it.tag_id = t.tag_id) AS image_count,
                 (SELECT COUNT(*) FROM " . self::VIDEO_TAG_TABLE . " vt WHERE vt.tag_id = t.tag_id) AS video_count
-             FROM " . self::MAIN_TABLE . " t LEFT JOIN " . self::CATEGORIES_TABLE . " tc USING (category_id) ORDER BY t.category_id ASC, t.tag_name ASC";
+             FROM " . self::MAIN_TABLE . " t LEFT JOIN " . self::CATEGORIES_TABLE . " tc USING (category_id)
+             ORDER BY t.category_id ASC, t.tag_name ASC";
 
         // Prepare statement
         $stmt = $this->db->prepare($sql);
@@ -504,28 +515,36 @@ class TagStorage
      *
      * @param Tag $tag The tag object to be saved.
      *
-     * @return int The ID of the newly saved tag.
+     * @return int The ID of the saved tag.
      */
     public function store(Tag $tag): int
     {
         // Check if already exists
         if (empty($tag->getTagId())) {
             $sql = "INSERT INTO " . self::MAIN_TABLE . " (category_id, tag_name) VALUES (:category_id, :tag_name)";
+        } else {
+            $sql = "UPDATE " . self::MAIN_TABLE . " SET category_id = :category_id, tag_name = :tag_name
+                                                        WHERE tag_id = :tag_id";
+        }
 
-            // Prepare statement
-            $stmt = $this->db->prepare($sql);
+        // Prepare statement
+        $stmt = $this->db->prepare($sql);
 
-            // If the statement was prepared successfully
-            if ($stmt) {
-                // Bind parameters
-                $stmt->bindValue(':category_id', $tag->getCategoryId(), PDO::PARAM_INT);
-                $stmt->bindValue(':tag_name', $tag->getTagName(), PDO::PARAM_STR);
+        // If the statement was prepared successfully
+        if ($stmt) {
+            // Bind parameters
+            $stmt->bindValue(':category_id', $tag->getCategoryId(), PDO::PARAM_INT);
+            $stmt->bindValue(':tag_name', $tag->getTagName(), PDO::PARAM_STR);
 
-                // Execute statement
-                if ($stmt->execute()) {
-                    // Get the last inserted ID
-                    $tag->setTagId((int)$this->db->lastInsertId());
-                }
+            // Bind ID if editing
+            if (!empty($tag->getTagId())) {
+                $stmt->bindValue(':tag_id', $tag->getTagId(), PDO::PARAM_INT);
+            }
+
+            // Execute statement
+            if ($stmt->execute()) {
+                // Get the last inserted ID
+                $tag->setTagId((int)$this->db->lastInsertId());
             }
         }
 
