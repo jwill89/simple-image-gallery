@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gallery</title>
+    <base href="/" />
     <link rel="icon" type="image/png" href="favicon/icon.png" />
     <!-- Stylesheets -->
     <link href="https://cdn.datatables.net/v/bm/dt-2.2.2/b-3.2.2/b-colvis-3.2.2/cr-2.0.4/fc-5.0.4/fh-4.0.1/r-3.0.4/sl-3.0.0/sr-1.4.1/datatables.min.css" rel="stylesheet" integrity="sha384-5bJ4GlPS9DMHSRoy3GajoDfhZbtWoOnF7ic9kjISkxl/VFjx7nE0rrxaazLziRzi" crossorigin="anonymous">
@@ -17,7 +18,7 @@
     <script type="text/javascript" src="js/external/lightbox.min.js"></script>
     <script type="text/javascript" src="js/gallery.js"></script>
     <!-- FontAwesome Kit -->
-    
+
 </head>
 
 <body class="sticky-footer has-navbar-fixed-top">
@@ -192,7 +193,7 @@
                                             <td>The name of a character in the image or video. We use a "&lt;First Name&gt; &lt;Last Name&gt;"
                                                 format for characters with a first and last name. For example, "Kurosaki Ichigo" would be <code>c:ichigo kurosaki</code>. If the character is known by a single name,
                                                 such as "Goku", then it would be <code>c:goku</code>. If a character's name is one that is a name in multiple sources, please list the source after the name in parentheses,
-                                                such as "George" which could be <code>c:George</code></td>
+                                                such as "George" which could be <code>c:george (george of the jungle)</code></td>
                                         </tr>
                                         <tr>
                                             <td><span class="tag is-warning">Source</span></td>
@@ -225,7 +226,7 @@
                 <div class="column is-one-quarter">
                     <div class="card" id="tag-list-new-tag-form">
                         <header class="card-header">
-                            <h2 class="card-header-title">New Tag Form</h2>
+                            <h2 class="card-header-title" id="tag-list-new-tag-form-header">New Tag Form</h2>
                             <button class="card-header-icon" aria-label="more options">
                                 <span class="icon">
                                     <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -255,6 +256,7 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <input type="hidden" id="new_tag_edit_id" value="" />
                                 </div>
                                 <div class="field is-grouped">
                                     <div class="control">
@@ -273,7 +275,9 @@
                         <table class="table is-striped is-hoverable" id="tag-list-page-table">
                             <thead>
                                 <tr>
+                                    <th>Tag ID</th>
                                     <th>Tag</th>
+                                    <th>Category ID</th>
                                     <th>Category</th>
                                     <th>Image Count</th>
                                     <th>Video Count</th>
