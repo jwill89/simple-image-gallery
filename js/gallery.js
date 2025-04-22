@@ -503,7 +503,7 @@ function RenderPageMediaTags(itemID, itemURL, itemHash = null) {
 
 /**
  * @function RenderPageTags
- * @description Generates the content for the tags page including rendering the Datatable.
+ * @description Generates the content for the tags page including rendering the DataTable.
  */
 function RenderPageTags() {
     // Define the Page Section
@@ -515,7 +515,7 @@ function RenderPageTags() {
     // Get the Table
     const tagsSectionTable = $('#tag-list-page-table');
 
-    // Set up the Tags Page Datatable
+    // Set up the Tags Page DataTable
     tagsSectionTable.DataTable({
         ajax: {
             url: `${API_BASE_URL}/tags/display/`,
@@ -668,7 +668,7 @@ function ClearPages() {
     mediaTagsSectionMediaItem.empty();
     mediaTagsSectionTags.empty();
 
-    // Clear the Tag List Page & Datatable
+    // Clear the Tag List Page & DataTable
     if (DataTable.isDataTable('#tag-list-page-table')) {
         tagsSectionTable.DataTable().clear().destroy();
         tagsSectionTableBody.empty();

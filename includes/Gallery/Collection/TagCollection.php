@@ -185,7 +185,7 @@ class TagCollection
      * Saves an tag to the database and generates a thumbnail.
      *
      * @param Tag $tag
-     * @return void
+     * @return int
      */
     public function save(Tag $tag): int
     {
@@ -198,7 +198,7 @@ class TagCollection
      * Deletes an tag from the database and the filesystem.
      *
      * @param Tag $tag
-     * @return void
+     * @return bool
      */
     public function delete(Tag $tag): bool
     {
